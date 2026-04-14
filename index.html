@@ -14,6 +14,7 @@
       --line: #2e3748;
       --accent: #3b82f6;
       --accent-2: #22c55e;
+      --purple: #7c3aed;
       --warning: #f59e0b;
     }
 
@@ -48,7 +49,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: 390px 1fr;
       gap: 16px;
     }
 
@@ -93,6 +94,12 @@
       outline: none;
     }
 
+    .field textarea {
+      resize: vertical;
+      min-height: 160px;
+      line-height: 1.4;
+    }
+
     .row-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -131,7 +138,7 @@
     }
 
     .btn-primary { background: var(--accent); }
-    .btn-secondary { background: #7c3aed; }
+    .btn-secondary { background: var(--purple); }
     .btn-success { background: var(--accent-2); }
     .btn-muted { background: #475569; }
 
@@ -168,7 +175,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 700px;
+      min-width: 760px;
     }
 
     th, td {
@@ -295,10 +302,17 @@
           <label><input type="checkbox" id="mature" checked /> Mature</label>
         </div>
 
+        <h3 class="sub-title">Import CSV From cBot</h3>
+        <div class="field">
+          <label for="csvInput">Paste exported CSV here</label>
+          <textarea id="csvInput" placeholder="Paste the CSV exported from your cBot here..."></textarea>
+        </div>
+
         <div class="btn-row">
           <button class="btn-primary" id="scanBtn">Scan</button>
           <button class="btn-secondary" id="sortBtn">Sort by ADX</button>
           <button class="btn-success" id="csvBtn">Download CSV</button>
+          <button class="btn-muted" id="importCsvBtn">Import CSV</button>
           <button class="btn-muted" id="loadSampleBtn">Load Sample Data</button>
         </div>
 
@@ -328,7 +342,7 @@
         </div>
 
         <div class="footer-note">
-          This starter page is frontend-only. Your actual screener logic still belongs in the cBot, and this page can later display/export those results.
+          Import the CSV exported from the cBot, then filter, sort, and download again from the webpage.
         </div>
       </div>
     </div>
@@ -367,6 +381,13 @@
       if (v === 1) return "Bullish";
       if (v === -1) return "Bearish";
       return "Neutral";
+    }
+
+    function textToState(value) {
+      const v = String(value || "").trim().toLowerCase();
+      if (v === "bullish") return 1;
+      if (v === "bearish") return -1;
+      return 0;
     }
 
     function isTagAllowed(tag) {
@@ -469,6 +490,93 @@
       setStatus(`CSV downloaded with ${filtered.length} rows.`);
     }
 
+    function parseCsvLine(line) {
+      const result = [];
+      let current = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        const next = line[i + 1];
+
+        if (ch === '"' && inQuotes && next === '"') {
+          current += '"';
+          i++;
+        } else if (ch === '"') {
+          inQuotes = !inQuotes;
+        } else if (ch === "," && !inQuotes) {
+          result.push(current);
+          current = "";
+        } else {
+          current += ch;
+        }
+      }
+
+      result.push(current);
+      return result;
+    }
+
+    function importCsv() {
+      const raw = document.getElementById("csvInput").value.trim();
+
+      if (!raw) {
+        setStatus("Paste CSV first.");
+        return;
+      }
+
+      const lines = raw.split(/\r?\n/).filter(Boolean);
+
+      if (lines.length < 2) {
+        setStatus("CSV does not contain data rows.");
+        return;
+      }
+
+      const header = parseCsvLine(lines[0]).map(x => x.trim().toLowerCase());
+
+      const symbolIndex = header.indexOf("symbol");
+      const adxIndex = header.indexOf("adx tag");
+      const tf1Index = header.indexOf("tf1 state");
+      const tf2Index = header.indexOf("tf2 state");
+      const marketIndex = header.indexOf("market");
+      const tf1NameIndex = header.indexOf("tf1");
+      const tf2NameIndex = header.indexOf("tf2");
+
+      if (symbolIndex === -1 || adxIndex === -1 || tf1Index === -1 || tf2Index === -1) {
+        setStatus("CSV header not recognized.");
+        return;
+      }
+
+      const parsed = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCsvLine(lines[i]);
+
+        parsed.push({
+          symbolName: cols[symbolIndex] || "",
+          htfAdxLabel: cols[adxIndex] || "",
+          tf1State: textToState(cols[tf1Index]),
+          tf2State: textToState(cols[tf2Index])
+        });
+
+        if (i === 1) {
+          if (marketIndex >= 0 && cols[marketIndex]) {
+            document.getElementById("market").value = cols[marketIndex];
+          }
+          if (tf1NameIndex >= 0 && cols[tf1NameIndex]) {
+            document.getElementById("tf1").value = cols[tf1NameIndex];
+          }
+          if (tf2NameIndex >= 0 && cols[tf2NameIndex]) {
+            document.getElementById("tf2").value = cols[tf2NameIndex];
+          }
+        }
+      }
+
+      state.results = parsed;
+      state.isSorted = false;
+      renderResults();
+      setStatus(`Imported ${parsed.length} rows from CSV.`);
+    }
+
     function setStatus(text) {
       document.getElementById("statusBox").textContent = text;
     }
@@ -482,16 +590,17 @@
 
     document.getElementById("sortBtn").addEventListener("click", () => {
       if (!state.results.length) {
-        setStatus("Load or receive data first.");
+        setStatus("Load or import data first.");
         return;
       }
       sortResults();
     });
 
     document.getElementById("csvBtn").addEventListener("click", downloadCsv);
+    document.getElementById("importCsvBtn").addEventListener("click", importCsv);
 
     document.getElementById("scanBtn").addEventListener("click", () => {
-      setStatus("This button is a placeholder for cBot/web integration.");
+      setStatus("This button is a placeholder for future cBot/web integration.");
     });
 
     ["ranged", "weak", "strong", "mature"].forEach(id => {
