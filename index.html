@@ -1,1 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cBot Screener</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --panel: #171a21;
+      --panel-2: #1e2430;
+      --text: #e7ecf3;
+      --muted: #9aa4b2;
+      --line: #2e3748;
+      --accent: #3b82f6;
+      --accent-2: #22c55e;
+      --warning: #f59e0b;
+    }
 
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .title {
+      margin-bottom: 16px;
+    }
+
+    .title h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+    }
+
+    .title p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .sub-title {
+      margin: 18px 0 8px;
+      font-size: 14px;
+      color: #cdd6e3;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .field select,
+    .field input,
+    .field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      outline: none;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin-top: 8px;
+    }
+
+    .checks label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      color: white;
+    }
+
+    .btn-primary { background: var(--accent); }
+    .btn-secondary { background: #7c3aed; }
+    .btn-success { background: var(--accent-2); }
+    .btn-muted { background: #475569; }
+
+    .status {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(245, 158, 11, 0.12);
+      color: #ffd58a;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      white-space: pre-wrap;
+    }
+
+    .results-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #121722;
+      position: sticky;
+      top: 0;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      border: 1px solid var(--line);
+      background: #202838;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="title">
+      <h1>cBot Screener</h1>
+      <p>Single-file web UI for your multi-market supertrend screener.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2 class="section-title">Settings</h2>
+
+        <div class="field">
+          <label for="market">Market</label>
+          <select id="market">
+            <option>US</option>
+            <option>EU</option>
+            <option>UK</option>
+            <option>DE</option>
+          </select>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label for="exchange1">Exchange 1</label>
+            <input id="exchange1" value="NYSE" />
+          </div>
+          <div class="field">
+            <label for="exchange2">Exchange 2</label>
+            <input id="exchange2" value="NASDAQ" />
+          </div>
+        </div>
+
+        <h3 class="sub-title">Supertrend 1</h3>
+        <div class="row-2">
+          <div class="field">
+            <label for="tf1">Timeframe</label>
+            <select id="tf1">
+              <option>Minute5</option>
+              <option>Minute15</option>
+              <option>Minute30</option>
+              <option>Hour</option>
+              <option>Hour4</option>
+              <option selected>Daily</option>
+              <option>Weekly</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sentiment1">Sentiment</label>
+            <select id="sentiment1">
+              <option>Any</option>
+              <option selected>Bullish</option>
+              <option>Bearish</option>
+            </select>
+          </div>
+        </div>
+
+        <h3 class="sub-title">Supertrend 2</h3>
+        <div class="row-2">
+          <div class="field">
+            <label for="tf2">Timeframe</label>
+            <select id="tf2">
+              <option>Minute5</option>
+              <option>Minute15</option>
+              <option>Minute30</option>
+              <option selected>Hour</option>
+              <option>Hour4</option>
+              <option>Daily</option>
+              <option>Weekly</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sentiment2">Sentiment</label>
+            <select id="sentiment2">
+              <option>Any</option>
+              <option>Bullish</option>
+              <option selected>Bearish</option>
+            </select>
+          </div>
+        </div>
+
+        <h3 class="sub-title">ADX Filters</h3>
+        <div class="checks">
+          <label><input type="checkbox" id="ranged" checked /> Ranged</label>
+          <label><input type="checkbox" id="weak" checked /> Weak</label>
+          <label><input type="checkbox" id="strong" checked /> Strong</label>
+          <label><input type="checkbox" id="mature" checked /> Mature</label>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-primary" id="scanBtn">Scan</button>
+          <button class="btn-secondary" id="sortBtn">Sort by ADX</button>
+          <button class="btn-success" id="csvBtn">Download CSV</button>
+          <button class="btn-muted" id="loadSampleBtn">Load Sample Data</button>
+        </div>
+
+        <div class="status" id="statusBox">Ready.</div>
+      </div>
+
+      <div class="card">
+        <div class="results-top">
+          <div>
+            <h2 class="section-title" style="margin-bottom:4px;">Matched Symbols</h2>
+            <div class="muted" id="resultSummary">No data loaded.</div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="resultsTable">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>ADX Tag</th>
+                <th>TF1 State</th>
+                <th>TF2 State</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+
+        <div class="footer-note">
+          This starter page is frontend-only. Your actual screener logic still belongs in the cBot, and this page can later display/export those results.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      isSorted: false,
+      results: []
+    };
+
+    const sampleResults = [
+      { symbolName: "AAPL.US", htfAdxLabel: "Strong Bull", tf1State: 1, tf2State: -1 },
+      { symbolName: "MSFT.US", htfAdxLabel: "Weak Bull", tf1State: 1, tf2State: -1 },
+      { symbolName: "TSLA.US", htfAdxLabel: "Mature Bear", tf1State: -1, tf2State: -1 },
+      { symbolName: "NVDA.US", htfAdxLabel: "Ranged Bull", tf1State: 1, tf2State: 1 },
+      { symbolName: "AMZN.US", htfAdxLabel: "Strong Bear", tf1State: -1, tf2State: -1 }
+    ];
+
+    function getRank(label) {
+      switch (label) {
+        case "Strong Bull": return 1;
+        case "Weak Bull": return 2;
+        case "Mature Bull": return 3;
+        case "Ranged Bull": return 4;
+        case "Strong Bear": return 5;
+        case "Weak Bear": return 6;
+        case "Mature Bear": return 7;
+        case "Ranged Bear": return 8;
+        case "NiLL": return 9;
+        default: return 99;
+      }
+    }
+
+    function stateText(v) {
+      if (v === 1) return "Bullish";
+      if (v === -1) return "Bearish";
+      return "Neutral";
+    }
+
+    function isTagAllowed(tag) {
+      const ranged = document.getElementById("ranged").checked;
+      const weak = document.getElementById("weak").checked;
+      const strong = document.getElementById("strong").checked;
+      const mature = document.getElementById("mature").checked;
+
+      if (tag.startsWith("Ranged") && !ranged) return false;
+      if (tag.startsWith("Weak") && !weak) return false;
+      if (tag.startsWith("Strong") && !strong) return false;
+      if (tag.startsWith("Mature") && !mature) return false;
+
+      return true;
+    }
+
+    function getFilteredResults() {
+      return state.results.filter(x => isTagAllowed(x.htfAdxLabel));
+    }
+
+    function renderResults() {
+      const body = document.getElementById("resultsBody");
+      const summary = document.getElementById("resultSummary");
+      const filtered = getFilteredResults();
+
+      body.innerHTML = "";
+
+      if (!filtered.length) {
+        summary.textContent = "No matching rows for current filters.";
+        return;
+      }
+
+      filtered.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.symbolName}</td>
+          <td><span class="tag">${item.htfAdxLabel}</span></td>
+          <td>${stateText(item.tf1State)}</td>
+          <td>${stateText(item.tf2State)}</td>
+        `;
+        body.appendChild(tr);
+      });
+
+      summary.textContent = `Matched symbols: ${filtered.length} | Order: ${state.isSorted ? "ADX Tag Sorted" : "Original"}`;
+    }
+
+    function sortResults() {
+      state.results.sort((a, b) => {
+        const rankCompare = getRank(a.htfAdxLabel) - getRank(b.htfAdxLabel);
+        if (rankCompare !== 0) return rankCompare;
+        return a.symbolName.localeCompare(b.symbolName);
+      });
+      state.isSorted = true;
+      setStatus("Results sorted by ADX tag.");
+      renderResults();
+    }
+
+    function downloadCsv() {
+      const filtered = getFilteredResults();
+
+      if (!filtered.length) {
+        setStatus("No rows available to export.");
+        return;
+      }
+
+      const market = document.getElementById("market").value;
+      const tf1 = document.getElementById("tf1").value;
+      const tf2 = document.getElementById("tf2").value;
+
+      const rows = [
+        ["Symbol", "ADX Tag", "TF1 State", "TF2 State", "Market", "TF1", "TF2"]
+      ];
+
+      filtered.forEach(item => {
+        rows.push([
+          item.symbolName,
+          item.htfAdxLabel,
+          stateText(item.tf1State),
+          stateText(item.tf2State),
+          market,
+          tf1,
+          tf2
+        ]);
+      });
+
+      const csv = rows
+        .map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "cbot-screener-results.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setStatus(`CSV downloaded with ${filtered.length} rows.`);
+    }
+
+    function setStatus(text) {
+      document.getElementById("statusBox").textContent = text;
+    }
+
+    document.getElementById("loadSampleBtn").addEventListener("click", () => {
+      state.results = [...sampleResults];
+      state.isSorted = false;
+      renderResults();
+      setStatus("Sample data loaded.");
+    });
+
+    document.getElementById("sortBtn").addEventListener("click", () => {
+      if (!state.results.length) {
+        setStatus("Load or receive data first.");
+        return;
+      }
+      sortResults();
+    });
+
+    document.getElementById("csvBtn").addEventListener("click", downloadCsv);
+
+    document.getElementById("scanBtn").addEventListener("click", () => {
+      setStatus("This button is a placeholder for cBot/web integration.");
+    });
+
+    ["ranged", "weak", "strong", "mature"].forEach(id => {
+      document.getElementById(id).addEventListener("change", renderResults);
+    });
+
+    renderResults();
+  </script>
+</body>
+</html>
