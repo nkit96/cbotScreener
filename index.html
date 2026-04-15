@@ -18,7 +18,6 @@
       --warn: #f4b740;
       --bad: #ef5350;
       --chip: #22314d;
-      --telegram: #2d9cdb;
       --radius: 14px;
       --shadow: 0 14px 40px rgba(0,0,0,.35);
     }
@@ -159,7 +158,6 @@
     }
     .btn-scan { background: var(--accent); }
     .btn-sort { background: var(--accent-2); }
-    .btn-telegram { background: var(--telegram); }
     .btn-secondary { background: #344667; }
     .status-grid {
       display: grid;
@@ -175,14 +173,14 @@
     }
     .stat .k { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
     .stat .v { font-size: 18px; font-weight: 800; }
-    .status-box, .active-box, .telegram-box {
+    .status-box, .active-box {
       background: var(--panel-2);
       border: 1px solid var(--line);
       border-radius: 12px;
       padding: 12px;
       margin-bottom: 12px;
     }
-    .status-box p, .active-box pre, .telegram-box pre {
+    .status-box p, .active-box pre {
       margin: 0;
       white-space: pre-wrap;
       word-break: break-word;
@@ -366,8 +364,7 @@
         <div class="actions">
           <button class="btn-scan" id="scanBtn">Scan Matching Symbols</button>
           <button class="btn-sort" id="sortBtn">Sort by ADX</button>
-          <button class="btn-telegram" id="telegramBtn">Build Telegram Text</button>
-          <button class="btn-secondary" id="sampleBtn">Load Sample Data</button>
+                    <button class="btn-secondary" id="sampleBtn">Load Sample Data</button>
         </div>
 
         <div class="footer-note">
@@ -414,10 +411,7 @@
           </table>
         </div>
 
-        <div class="telegram-box" style="margin-top:12px">
-          <pre id="telegramPreview">Telegram preview will appear here.</pre>
-        </div>
-      </div>
+              </div>
     </div>
   </div>
 
@@ -477,7 +471,6 @@
       $('showProgress').addEventListener('change', toggleProgress);
       $('scanBtn').addEventListener('click', runDemoScan);
       $('sortBtn').addEventListener('click', sortByAdx);
-      $('telegramBtn').addEventListener('click', buildTelegramPreview);
       $('sampleBtn').addEventListener('click', loadSampleData);
     }
 
@@ -631,7 +624,6 @@
       setStatus('Ready', 'Sample results loaded. This is a UI demo until you connect it to your cTrader WebView plugin.');
       refreshActive();
       renderResults();
-      buildTelegramPreview();
     }
 
     function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -658,8 +650,7 @@
           state.activeJobs = [];
           refreshActive();
           setStatus('Complete', `Scan complete. Matched: ${state.matchedSymbols.length}`);
-          buildTelegramPreview();
-          return;
+              return;
         }
 
         const symbol = symbols[i];
@@ -689,34 +680,6 @@
       }, 650);
     }
 
-    function buildTelegramPreview() {
-      const filtered = state.matchedSymbols.filter(m => isTagAllowed(m.HtfAdxLabel));
-      if (!filtered.length) {
-        $('telegramPreview').textContent = 'No matched symbols with current tag filters to send.';
-        return;
-      }
-      const market = $('market').value;
-      const ex1 = $('exchange1').value || '';
-      const ex2 = $('exchange2').value || '';
-      const ltf = $('tf2').value;
-      const interval = tvInterval(ltf);
-      const lines = [];
-      lines.push('Screener Results');
-      lines.push(`Market: ${market}`);
-      lines.push(`Order: ${state.sortedByAdx ? 'ADX Tag Sorted' : 'Scan Order'}`);
-      lines.push(`LTF: ${ltf}`);
-      lines.push(`EX1 ${ex1} | EX2 ${ex2}`);
-      lines.push('');
-      filtered.forEach(item => {
-        const ticker = item.SymbolName.split('.')[0];
-        const parts = [`${ticker} | ${item.HtfAdxLabel}`];
-        if (ex1) parts.push(`EX1: https://www.tradingview.com/chart/?symbol=${ex1}:${ticker}&interval=${interval}`);
-        if (ex2) parts.push(`EX2: https://www.tradingview.com/chart/?symbol=${ex2}:${ticker}&interval=${interval}`);
-        lines.push(parts.join(' | '));
-      });
-      $('telegramPreview').textContent = lines.join('\n');
-    }
-
     init();
 
     // cTrader WebView integration placeholder.
@@ -726,8 +689,7 @@
         state.matchedSymbols = Array.isArray(results) ? results : [];
         state.sortedByAdx = false;
         renderResults();
-        buildTelegramPreview();
-      },
+        },
       setStatus(message) {
         setStatus('Update', message || '');
       }
