@@ -89,13 +89,23 @@
   function bindThemeToggle() {
     els.themeToggle?.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme') || 'light';
-      document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
     });
+  }
+
+  function resolveTheme(themeValue) {
+    const value = String(themeValue || '').toLowerCase();
+    if (['dark', 'black', 'night'].includes(value)) return 'dark';
+    return 'light';
+  }
+
+  function applyTheme(themeValue) {
+    document.documentElement.setAttribute('data-theme', resolveTheme(themeValue));
   }
 
   function applyPluginContext() {
     const c = state.plugin.context;
-    document.documentElement.setAttribute('data-theme', c.theme === 'dark' ? 'dark' : 'light');
+    applyTheme(c.theme);
     if (c.mode === 'plugin') els.modeSelect.value = 'plugin';
     els.pluginContextText.textContent = JSON.stringify({ ...state.plugin }, null, 2);
   }
