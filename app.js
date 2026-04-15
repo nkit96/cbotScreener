@@ -17,10 +17,18 @@
 
   const els = {};
 
-  document.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 
   async function init() {
     captureElements();
+    if (!hasRequiredElements()) {
+      console.error('Screener init failed: required DOM elements are missing. Check that index.html matches app.js IDs.');
+      return;
+    }
     bindThemeToggle();
     populateStaticControls();
     bindEvents();
@@ -37,6 +45,17 @@
       'showProgressCheck','scanButton','sortButton','statusText','activeJobsText','pluginContextText',
       'filterRanged','filterWeak','filterStrong','filterMature','resultSummary','orderSummary','resultsBody','mobileCards','themeToggle'
     ].forEach(id => els[id] = document.getElementById(id));
+  }
+
+
+  function hasRequiredElements() {
+    const required = [
+      'marketSelect','modeSelect','exchange1Select','exchange2Select','tf1Select','sentiment1Select','tf2Select','sentiment2Select',
+      'atrLengthInput','multiplierInput','adxPeriodInput','batchSizeInput','slowSymbolInput','maxResultsInput',
+      'showProgressCheck','scanButton','sortButton','statusText','activeJobsText','pluginContextText',
+      'filterRanged','filterWeak','filterStrong','filterMature','resultSummary','orderSummary','resultsBody','mobileCards'
+    ];
+    return required.every(id => els[id]);
   }
 
   function populateStaticControls() {
