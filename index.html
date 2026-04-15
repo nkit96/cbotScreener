@@ -1,638 +1,737 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Multi-Market Supertrend Screener</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>multi-market-supertrend-screener-webview</title>
   <style>
-:root, [data-theme="light"] {
-  --bg: #f7f6f2;
-  --surface: #ffffff;
-  --surface-2: #f2efe9;
-  --text: #22201a;
-  --muted: #6b6a65;
-  --border: #d8d4cb;
-  --primary: #0b6b72;
-  --primary-hover: #09565c;
-  --accent: #e7f3f2;
-  --danger: #a13544;
-  --shadow: 0 12px 32px rgba(32, 29, 21, 0.08);
-}
-[data-theme="dark"] {
-  --bg: #171614;
-  --surface: #1d1c19;
-  --surface-2: #262420;
-  --text: #ece8df;
-  --muted: #a19c92;
-  --border: #3a372f;
-  --primary: #58a2ac;
-  --primary-hover: #7db9c1;
-  --accent: #243133;
-  --danger: #dd6974;
-  --shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-.skip-link { position: absolute; left: -999px; top: 1rem; }
-.skip-link:focus { left: 1rem; z-index: 20; background: var(--surface); padding: .75rem 1rem; }
-.topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 1.25rem 1.25rem 0; }
-.eyebrow { margin: 0 0 .25rem; color: var(--primary); font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
-h1 { margin: 0; font-size: clamp(1.7rem, 1.2rem + 2vw, 2.4rem); }
-.subtext { color: var(--muted); margin: .35rem 0 0; max-width: 70ch; }
-.icon-button, button, select, input { font: inherit; }
-.icon-button { min-width: 44px; min-height: 44px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); cursor: pointer; }
-.app-shell { display: grid; grid-template-columns: 360px 1fr; gap: 1rem; padding: 1.25rem; }
-.panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); padding: 1rem; }
-.controls-panel { position: sticky; top: 1rem; align-self: start; }
-.section-title-wrap, .results-header { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
-.badge { background: var(--accent); color: var(--primary); padding: .35rem .65rem; border-radius: 999px; font-size: .82rem; font-weight: 700; }
-.grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
-.field { display: flex; flex-direction: column; gap: .35rem; font-size: .93rem; }
-.field span { color: var(--muted); font-weight: 600; }
-select, input { width: 100%; min-height: 44px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); padding: .75rem .85rem; }
-.subpanel { margin-top: .8rem; padding-top: .8rem; border-top: 1px solid var(--border); }
-.subpanel h3 { margin: 0 0 .65rem; font-size: 1rem; }
-.inline-options, .button-row { margin-top: .9rem; }
-.checkbox, .checkbox-pill { display: inline-flex; align-items: center; gap: .5rem; font-size: .94rem; }
-.button-row { display: flex; gap: .75rem; flex-wrap: wrap; }
-.primary-button, .secondary-button { min-height: 44px; border-radius: 12px; padding: .8rem 1rem; border: 1px solid transparent; cursor: pointer; font-weight: 700; }
-.primary-button { background: var(--primary); color: white; }
-.primary-button:hover { background: var(--primary-hover); }
-.secondary-button { background: var(--surface-2); color: var(--text); border-color: var(--border); }
-.secondary-button:disabled { opacity: .55; cursor: not-allowed; }
-.status-box { margin-top: 1rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: .85rem; }
-.muted-box { font-size: .88rem; }
-.status-box p { margin: 0 0 .5rem; }
-pre { white-space: pre-wrap; margin: 0; font-family: ui-monospace, SFMono-Regular, monospace; font-size: .84rem; color: var(--muted); }
-.filter-pills { display: flex; flex-wrap: wrap; gap: .5rem; }
-.checkbox-pill { background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: .45rem .7rem; }
-.summary-bar { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; padding: .8rem .9rem; background: var(--surface-2); border-radius: 14px; border: 1px solid var(--border); }
-.table-wrap { overflow: auto; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: .85rem .7rem; border-bottom: 1px solid var(--border); vertical-align: top; text-align: left; }
-th { font-size: .84rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-.symbol-line { font-weight: 700; }
-.tag { display: inline-block; padding: .3rem .55rem; border-radius: 999px; font-size: .8rem; font-weight: 700; }
-.tag.ranged { background: #ece8df; color: #6f5d30; }
-.tag.weak { background: #e4ecff; color: #264a93; }
-.tag.strong { background: #e5f4ea; color: #21633d; }
-.tag.mature { background: #f8e3e7; color: #8d3140; }
-.tag.nil { background: #e9e9e9; color: #555; }
-[data-theme="dark"] .tag.ranged { background: #453f33; color: #f1d891; }
-[data-theme="dark"] .tag.weak { background: #24344d; color: #9fc0ff; }
-[data-theme="dark"] .tag.strong { background: #20372a; color: #9ee0b5; }
-[data-theme="dark"] .tag.mature { background: #4a2b31; color: #ffb4c0; }
-[data-theme="dark"] .tag.nil { background: #343434; color: #ddd; }
-.link-group { display: flex; flex-wrap: wrap; gap: .45rem; }
-.link-group a, .copy-button { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: .45rem .7rem; border-radius: 10px; text-decoration: none; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); cursor: pointer; }
-.mobile-cards { display: none; gap: .85rem; margin-top: 1rem; }
-.result-card { border: 1px solid var(--border); border-radius: 16px; padding: .9rem; background: var(--surface-2); }
-.result-card h3 { margin: 0 0 .5rem; font-size: 1rem; }
-.result-meta { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .65rem; }
-.empty-state { padding: 1rem; color: var(--muted); }
-@media (max-width: 980px) { .app-shell { grid-template-columns: 1fr; } .controls-panel { position: static; } }
-@media (max-width: 720px) { .grid-two { grid-template-columns: 1fr; } .table-wrap { display: none; } .mobile-cards { display: grid; } .topbar { flex-direction: column; } }
+    :root {
+      --bg: #0b1220;
+      --panel: #121a2b;
+      --panel-2: #192338;
+      --line: #2b3852;
+      --text: #eef4ff;
+      --muted: #9fb0cf;
+      --accent: #2d6cdf;
+      --accent-2: #7a5af8;
+      --good: #23c16b;
+      --warn: #f4b740;
+      --bad: #ef5350;
+      --chip: #22314d;
+      --telegram: #2d9cdb;
+      --radius: 14px;
+      --shadow: 0 14px 40px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #09101d 0%, #0c1424 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .app {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .titlebar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: var(--shadow);
+      font-weight: 800;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+    .brand p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .badge {
+      background: #15223a;
+      border: 1px solid var(--line);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: rgba(18,26,43,.95);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .left, .right { padding: 16px; }
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .sub {
+      margin: 0 0 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .field {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    select, input[type="text"], input[type="number"], textarea {
+      width: 100%;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      outline: none;
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45,108,223,.2);
+    }
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 14px;
+    }
+    .check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--chip);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .check input { accent-color: var(--accent); }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+    }
+    .btn-scan { background: var(--accent); }
+    .btn-sort { background: var(--accent-2); }
+    .btn-telegram { background: var(--telegram); }
+    .btn-secondary { background: #344667; }
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .stat .k { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .stat .v { font-size: 18px; font-weight: 800; }
+    .status-box, .active-box, .telegram-box {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .status-box p, .active-box pre, .telegram-box pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .results-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: var(--chip);
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+      background: var(--panel-2);
+    }
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    th {
+      color: var(--muted);
+      position: sticky;
+      top: 0;
+      background: #1b2740;
+      z-index: 1;
+    }
+    .tag {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .Ranged { background: rgba(244,183,64,.18); color: #ffd26a; }
+    .Weak { background: rgba(45,156,219,.18); color: #79d0ff; }
+    .Strong { background: rgba(35,193,107,.16); color: #78f0ae; }
+    .Mature { background: rgba(122,90,248,.18); color: #c9b6ff; }
+    .Bullish { color: #78f0ae; font-weight: 700; }
+    .Bearish { color: #ff8d89; font-weight: 700; }
+    .muted { color: var(--muted); }
+    .footer-note {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+      font-size: 12px !important;
+    }
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .status-grid { grid-template-columns: 1fr; }
+      .row2 { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">cTrader WebView Plugin</p>
-      <h1>Multi-Market Supertrend Screener</h1>
-      <p class="subtext">Single-file version for easier GitHub Pages debugging.</p>
-    </div>
-    <div class="topbar-actions">
-      <button id="themeToggle" class="icon-button" type="button" aria-label="Toggle theme">◐</button>
-    </div>
-  </header>
-
-  <main id="main" class="app-shell">
-    <section class="panel controls-panel">
-      <div class="section-title-wrap">
-        <h2>Scanner controls</h2>
-        <span class="badge">Single file</span>
-      </div>
-
-      <div class="grid-two">
-        <label class="field">
-          <span>Market</span>
-          <select id="marketSelect"></select>
-        </label>
-        <label class="field">
-          <span>Mode</span>
-          <select id="modeSelect">
-            <option value="demo">Demo</option>
-            <option value="plugin">Plugin</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="grid-two">
-        <label class="field">
-          <span>Exchange 1</span>
-          <select id="exchange1Select"></select>
-        </label>
-        <label class="field">
-          <span>Exchange 2</span>
-          <select id="exchange2Select"></select>
-        </label>
-      </div>
-
-      <section class="subpanel">
-        <h3>Supertrend 1</h3>
-        <div class="grid-two">
-          <label class="field">
-            <span>Timeframe</span>
-            <select id="tf1Select"></select>
-          </label>
-          <label class="field">
-            <span>Sentiment</span>
-            <select id="sentiment1Select"></select>
-          </label>
-        </div>
-      </section>
-
-      <section class="subpanel">
-        <h3>Supertrend 2</h3>
-        <div class="grid-two">
-          <label class="field">
-            <span>Timeframe</span>
-            <select id="tf2Select"></select>
-          </label>
-          <label class="field">
-            <span>Sentiment</span>
-            <select id="sentiment2Select"></select>
-          </label>
-        </div>
-      </section>
-
-      <section class="subpanel">
-        <h3>Engine settings</h3>
-        <div class="grid-two">
-          <label class="field">
-            <span>ATR Length</span>
-            <input id="atrLengthInput" type="number" min="1" value="10" />
-          </label>
-          <label class="field">
-            <span>Multiplier</span>
-            <input id="multiplierInput" type="number" step="0.1" min="0.1" value="3" />
-          </label>
-        </div>
-        <div class="grid-two">
-          <label class="field">
-            <span>ADX Period</span>
-            <input id="adxPeriodInput" type="number" min="5" value="14" />
-          </label>
-          <label class="field">
-            <span>Batch Size</span>
-            <input id="batchSizeInput" type="number" min="1" max="20" value="5" />
-          </label>
-        </div>
-        <div class="grid-two">
-          <label class="field">
-            <span>Slow Symbol Seconds</span>
-            <input id="slowSymbolInput" type="number" min="2" max="60" value="8" />
-          </label>
-          <label class="field">
-            <span>Max Results</span>
-            <input id="maxResultsInput" type="number" min="10" value="150" />
-          </label>
-        </div>
-      </section>
-
-      <div class="inline-options">
-        <label class="checkbox"><input id="showProgressCheck" type="checkbox" checked /> Show progress / updates</label>
-      </div>
-
-      <div class="button-row">
-        <button id="scanButton" class="primary-button" type="button">Scan matching symbols</button>
-        <button id="sortButton" class="secondary-button" type="button" disabled>Sort by ADX</button>
-      </div>
-
-      <div class="status-box">
-        <p id="statusText">Ready. Choose filters and click Scan.</p>
-        <pre id="activeJobsText">Active: -</pre>
-      </div>
-
-      <div class="status-box muted-box">
-        <p><strong>Plugin context</strong></p>
-        <pre id="pluginContextText">Loading context…</pre>
-      </div>
-    </section>
-
-    <section class="panel results-panel">
-      <div class="results-header">
+  <div class="app">
+    <div class="titlebar">
+      <div class="brand">
+        <div class="logo">MS</div>
         <div>
-          <h2>Matched symbols</h2>
-          <p class="subtext">Single-file app version with the same scan behavior and easier debugging.</p>
-        </div>
-        <div class="filter-pills">
-          <label class="checkbox-pill"><input id="filterRanged" type="checkbox" checked /> Ranged</label>
-          <label class="checkbox-pill"><input id="filterWeak" type="checkbox" checked /> Weak</label>
-          <label class="checkbox-pill"><input id="filterStrong" type="checkbox" checked /> Strong</label>
-          <label class="checkbox-pill"><input id="filterMature" type="checkbox" checked /> Mature</label>
+          <h1>Multi-Market Supertrend Screener</h1>
+          <p>Single-file WebView UI mock based on your cBot panel.</p>
         </div>
       </div>
+      <div class="badge">Single HTML file · GitHub Pages ready</div>
+    </div>
 
-      <div class="summary-bar">
-        <span id="resultSummary">Matched symbols: 0</span>
-        <span id="orderSummary">Order: Scan Order</span>
+    <div class="layout">
+      <div class="card left">
+        <h2 class="section-title">Scan setup</h2>
+        <p class="sub">This reproduces the controls from your cBot: market, exchanges, two Supertrend filters, result tag filters, sorting, progress, and Telegram message preview.</p>
+
+        <div class="field">
+          <label for="market">Market</label>
+          <select id="market"></select>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="exchange1">Exchange 1</label>
+            <select id="exchange1"></select>
+          </div>
+          <div class="field">
+            <label for="exchange2">Exchange 2</label>
+            <select id="exchange2"></select>
+          </div>
+        </div>
+
+        <h3 class="section-title">Supertrend 1</h3>
+        <div class="row2">
+          <div class="field">
+            <label for="tf1">Timeframe</label>
+            <select id="tf1"></select>
+          </div>
+          <div class="field">
+            <label for="sentiment1">Sentiment</label>
+            <select id="sentiment1"></select>
+          </div>
+        </div>
+
+        <h3 class="section-title">Supertrend 2</h3>
+        <div class="row2">
+          <div class="field">
+            <label for="tf2">Timeframe</label>
+            <select id="tf2"></select>
+          </div>
+          <div class="field">
+            <label for="sentiment2">Sentiment</label>
+            <select id="sentiment2"></select>
+          </div>
+        </div>
+
+        <h3 class="section-title">Parameters</h3>
+        <div class="row2">
+          <div class="field">
+            <label for="atrLength">ATR Length</label>
+            <input id="atrLength" type="number" value="10" />
+          </div>
+          <div class="field">
+            <label for="multiplier">Multiplier</label>
+            <input id="multiplier" type="number" step="0.1" value="3.0" />
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="adxPeriod">ADX Period</label>
+            <input id="adxPeriod" type="number" value="14" />
+          </div>
+          <div class="field">
+            <label for="maxResults">Max Results On Panel</label>
+            <input id="maxResults" type="number" value="150" />
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="batchSize">Batch Size</label>
+            <input id="batchSize" type="number" value="5" />
+          </div>
+          <div class="field">
+            <label for="slowSeconds">Slow Symbol Seconds</label>
+            <input id="slowSeconds" type="number" value="8" />
+          </div>
+        </div>
+
+        <h3 class="section-title">Result tag filters</h3>
+        <div class="checks">
+          <label class="check"><input id="fRanged" type="checkbox" checked />Ranged</label>
+          <label class="check"><input id="fWeak" type="checkbox" checked />Weak</label>
+          <label class="check"><input id="fStrong" type="checkbox" checked />Strong</label>
+          <label class="check"><input id="fMature" type="checkbox" checked />Mature</label>
+        </div>
+
+        <div class="field">
+          <label class="check" style="width:max-content"><input id="showProgress" type="checkbox" checked />Show Progress / Updates</label>
+        </div>
+
+        <div class="actions">
+          <button class="btn-scan" id="scanBtn">Scan Matching Symbols</button>
+          <button class="btn-sort" id="sortBtn">Sort by ADX</button>
+          <button class="btn-telegram" id="telegramBtn">Build Telegram Text</button>
+          <button class="btn-secondary" id="sampleBtn">Load Sample Data</button>
+        </div>
+
+        <div class="footer-note">
+          In WebView mode, these buttons can later call cTrader plugin methods instead of local demo data.
+        </div>
       </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>HTF ADX</th>
-              <th>ST1</th>
-              <th>ST2</th>
-              <th>Links</th>
-            </tr>
-          </thead>
-          <tbody id="resultsBody"></tbody>
-        </table>
-      </div>
+      <div class="card right">
+        <div class="status-grid">
+          <div class="stat"><div class="k">Status</div><div class="v" id="statusShort">Ready</div></div>
+          <div class="stat"><div class="k">Active Jobs</div><div class="v" id="activeCount">0</div></div>
+          <div class="stat"><div class="k">Matches</div><div class="v" id="matchCount">0</div></div>
+        </div>
 
-      <div id="mobileCards" class="mobile-cards"></div>
-    </section>
-  </main>
+        <div class="status-box" id="statusWrap">
+          <p id="statusText">Ready. Choose filters and click Scan.</p>
+        </div>
+
+        <div class="active-box" id="activeWrap">
+          <pre id="activeJobsText">Active: -</pre>
+        </div>
+
+        <div class="results-head">
+          <div>
+            <h2 class="section-title" style="margin-bottom:4px">Matched Symbols</h2>
+            <div class="muted" id="resultMeta">Order: Scan Order</div>
+          </div>
+          <div class="pill" id="visibleCount">Visible: 0</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Symbol</th>
+                <th>ADX Label</th>
+                <th>ST1</th>
+                <th>ST2</th>
+                <th>TV Links</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+
+        <div class="telegram-box" style="margin-top:12px">
+          <pre id="telegramPreview">Telegram preview will appear here.</pre>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
-window.SCREENER_CONFIG = {
-  markets: {
-    US: { suffix: '.US', exchanges: ['NYSE', 'NASDAQ', 'AMEX'] },
-    EU: { suffix: '.EU', exchanges: ['XETR', 'EURONEXT', 'FWB'] },
-    UK: { suffix: '.UK', exchanges: ['LSE'] },
-    DE: { suffix: '.DE', exchanges: ['XETR', 'FWB'] }
-  },
-  timeframes: ['Minute5', 'Minute15', 'Minute30', 'Hour', 'Hour4', 'Daily', 'Weekly'],
-  sentiments: ['Any', 'Bullish', 'Bearish'],
-  timeframeToTv: {
-    Minute5: '5', Minute15: '15', Minute30: '30', Hour: '60', Hour4: '240', Daily: '1D', Weekly: '1W'
-  },
-  adxTagRank: {
-    'Strong Bull': 1, 'Weak Bull': 2, 'Mature Bull': 3, 'Ranged Bull': 4,
-    'Strong Bear': 5, 'Weak Bear': 6, 'Mature Bear': 7, 'Ranged Bear': 8, 'NiLL': 9
-  },
-  demoSymbolsByMarket: {
-    US: ['AAPL.US','MSFT.US','NVDA.US','TSLA.US','META.US','AMD.US','PLTR.US','AMZN.US','GOOGL.US','JPM.US'],
-    EU: ['ADS.EU','MC.EU','RMS.EU','AIR.EU','SAN.EU','OR.EU'],
-    UK: ['BARC.UK','VOD.UK','SHEL.UK','BP.UK','HSBA.UK'],
-    DE: ['SAP.DE','BMW.DE','SIE.DE','ALV.DE','MBG.DE']
-  }
-};
+    const marketConfigs = {
+      US: { suffix: '.US', exchanges: ['NYSE', 'NASDAQ', 'AMEX'] },
+      EU: { suffix: '.EU', exchanges: ['XETR', 'EURONEXT', 'FWB'] },
+      UK: { suffix: '.UK', exchanges: ['LSE'] },
+      DE: { suffix: '.DE', exchanges: ['XETR', 'FWB'] }
+    };
 
-window.ScreenerIndicators = (function () {
-  function getSupertrendState(bars, atrLength, multiplier) {
-    if (!bars || bars.length < Math.max(atrLength + 5, 20)) return 0;
-    const count = bars.length;
-    const tr = new Array(count).fill(0), atr = new Array(count).fill(0), upperBand = new Array(count).fill(0), lowerBand = new Array(count).fill(0), superTrend = new Array(count).fill(0), trendDirection = new Array(count).fill(0);
-    for (let i = 1; i < count; i++) {
-      const high = bars[i].high, low = bars[i].low, prevClose = bars[i - 1].close;
-      tr[i] = Math.max(high - low, Math.max(Math.abs(high - prevClose), Math.abs(low - prevClose)));
+    const timeframes = ['Minute5','Minute15','Minute30','Hour','Hour4','Daily','Weekly'];
+    const sentiments = ['Any','Bullish','Bearish'];
+
+    const sampleSymbolsByMarket = {
+      US: ['AAPL.US','MSFT.US','NVDA.US','TSLA.US','AMZN.US','META.US','AMD.US','NFLX.US','GOOGL.US','JPM.US','PLTR.US','COIN.US'],
+      EU: ['SAP.EU','ADS.EU','MC.EU','AIR.EU','OR.EU','SAN.EU'],
+      UK: ['VOD.UK','SHEL.UK','BARC.UK','HSBA.UK'],
+      DE: ['BMW.DE','SIE.DE','ALV.DE','BAS.DE','DTE.DE']
+    };
+
+    const state = {
+      matchedSymbols: [],
+      sortedByAdx: false,
+      scanning: false,
+      completed: 0,
+      activeJobs: [],
+      total: 0
+    };
+
+    const $ = id => document.getElementById(id);
+
+    function fillSelect(select, items, selected) {
+      select.innerHTML = '';
+      items.forEach(v => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = v;
+        if (v === selected) o.selected = true;
+        select.appendChild(o);
+      });
     }
-    const atrSeedEnd = Math.min(atrLength, count - 1);
-    if (atrSeedEnd <= 1) return 0;
-    let firstAtr = 0;
-    for (let i = 1; i <= atrSeedEnd; i++) firstAtr += tr[i];
-    firstAtr /= atrLength;
-    atr[atrSeedEnd] = firstAtr;
-    for (let i = atrSeedEnd + 1; i < count; i++) atr[i] = ((atr[i - 1] * (atrLength - 1)) + tr[i]) / atrLength;
-    for (let i = 1; i < count; i++) {
-      if (atr[i] === 0) continue;
-      const hl2 = (bars[i].high + bars[i].low) / 2;
-      const basicUpperBand = hl2 + multiplier * atr[i];
-      const basicLowerBand = hl2 - multiplier * atr[i];
-      if (i === 1 || upperBand[i - 1] === 0 || lowerBand[i - 1] === 0) {
-        upperBand[i] = basicUpperBand; lowerBand[i] = basicLowerBand; trendDirection[i] = 1; superTrend[i] = lowerBand[i]; continue;
+
+    function init() {
+      fillSelect($('market'), Object.keys(marketConfigs), 'US');
+      fillSelect($('tf1'), timeframes, 'Daily');
+      fillSelect($('tf2'), timeframes, 'Hour');
+      fillSelect($('sentiment1'), sentiments, 'Bullish');
+      fillSelect($('sentiment2'), sentiments, 'Bearish');
+      applyMarketSelection();
+      bind();
+      loadSampleData();
+    }
+
+    function bind() {
+      $('market').addEventListener('change', applyMarketSelection);
+      ['fRanged','fWeak','fStrong','fMature'].forEach(id => $(id).addEventListener('change', renderResults));
+      $('showProgress').addEventListener('change', toggleProgress);
+      $('scanBtn').addEventListener('click', runDemoScan);
+      $('sortBtn').addEventListener('click', sortByAdx);
+      $('telegramBtn').addEventListener('click', buildTelegramPreview);
+      $('sampleBtn').addEventListener('click', loadSampleData);
+    }
+
+    function applyMarketSelection() {
+      const market = $('market').value || 'US';
+      const cfg = marketConfigs[market];
+      fillSelect($('exchange1'), cfg.exchanges, cfg.exchanges[0] || '');
+      fillSelect($('exchange2'), cfg.exchanges, cfg.exchanges[1] || cfg.exchanges[0] || '');
+    }
+
+    function toggleProgress() {
+      const on = $('showProgress').checked;
+      $('statusWrap').style.display = on ? 'block' : 'none';
+      $('activeWrap').style.display = on ? 'block' : 'none';
+    }
+
+    function getAdxTagRank(label) {
+      switch (label) {
+        case 'Strong Bull': return 1;
+        case 'Weak Bull': return 2;
+        case 'Mature Bull': return 3;
+        case 'Ranged Bull': return 4;
+        case 'Strong Bear': return 5;
+        case 'Weak Bear': return 6;
+        case 'Mature Bear': return 7;
+        case 'Ranged Bear': return 8;
+        case 'NiLL': return 9;
+        default: return 99;
       }
-      const prevUpperBand = upperBand[i - 1], prevLowerBand = lowerBand[i - 1], prevClose = bars[i - 1].close, close = bars[i].close;
-      upperBand[i] = (basicUpperBand < prevUpperBand || prevClose > prevUpperBand) ? basicUpperBand : prevUpperBand;
-      lowerBand[i] = (basicLowerBand > prevLowerBand || prevClose < prevLowerBand) ? basicLowerBand : prevLowerBand;
-      const prevSuperTrend = superTrend[i - 1];
-      const wasDownTrend = Math.abs(prevSuperTrend - prevUpperBand) < 1e-10;
-      const wasUpTrend = Math.abs(prevSuperTrend - prevLowerBand) < 1e-10;
-      if (wasDownTrend) trendDirection[i] = close > upperBand[i] ? 1 : -1;
-      else if (wasUpTrend) trendDirection[i] = close < lowerBand[i] ? -1 : 1;
-      else trendDirection[i] = trendDirection[i - 1];
-      superTrend[i] = trendDirection[i] === 1 ? lowerBand[i] : upperBand[i];
     }
-    const closedIndex = count - 2;
-    if (closedIndex < 1) return 0;
-    return trendDirection[closedIndex];
-  }
 
-  function getHtfAdxLabel(bars, adxPeriod) {
-    if (!bars || bars.length < adxPeriod + 5) return 'NiLL';
-    const dms = calculateDms(bars, adxPeriod);
-    const index = bars.length - 2;
-    if (index < 1 || !dms.adx[index]) return 'NiLL';
-    const adx = dms.adx[index], diPlus = dms.diPlus[index], diMinus = dms.diMinus[index];
-    if (Math.abs(diPlus - diMinus) < 1e-10) return 'NiLL';
-    const direction = diPlus > diMinus ? 'Bull' : 'Bear';
-    let strength = 'NiLL';
-    if (adx <= 20) strength = 'Ranged'; else if (adx <= 25) strength = 'Weak'; else if (adx <= 50) strength = 'Strong'; else strength = 'Mature';
-    return `${strength} ${direction}`;
-  }
-
-  function calculateDms(bars, period) {
-    const len = bars.length, tr = new Array(len).fill(0), plusDM = new Array(len).fill(0), minusDM = new Array(len).fill(0), trSmoothed = new Array(len).fill(0), plusSmoothed = new Array(len).fill(0), minusSmoothed = new Array(len).fill(0), diPlus = new Array(len).fill(0), diMinus = new Array(len).fill(0), dx = new Array(len).fill(0), adx = new Array(len).fill(0);
-    for (let i = 1; i < len; i++) {
-      const upMove = bars[i].high - bars[i - 1].high, downMove = bars[i - 1].low - bars[i].low;
-      plusDM[i] = upMove > downMove && upMove > 0 ? upMove : 0;
-      minusDM[i] = downMove > upMove && downMove > 0 ? downMove : 0;
-      tr[i] = Math.max(bars[i].high - bars[i].low, Math.max(Math.abs(bars[i].high - bars[i - 1].close), Math.abs(bars[i].low - bars[i - 1].close)));
+    function isTagAllowed(tag) {
+      if (!tag) return false;
+      const ranged = tag.startsWith('Ranged');
+      const weak = tag.startsWith('Weak');
+      const strong = tag.startsWith('Strong');
+      const mature = tag.startsWith('Mature');
+      if (ranged && !$('fRanged').checked) return false;
+      if (weak && !$('fWeak').checked) return false;
+      if (strong && !$('fStrong').checked) return false;
+      if (mature && !$('fMature').checked) return false;
+      return ranged || weak || strong || mature;
     }
-    let trSeed = 0, plusSeed = 0, minusSeed = 0;
-    for (let i = 1; i <= period && i < len; i++) { trSeed += tr[i]; plusSeed += plusDM[i]; minusSeed += minusDM[i]; }
-    if (len <= period + 1) return { adx, diPlus, diMinus };
-    trSmoothed[period] = trSeed; plusSmoothed[period] = plusSeed; minusSmoothed[period] = minusSeed;
-    for (let i = period + 1; i < len; i++) {
-      trSmoothed[i] = trSmoothed[i - 1] - (trSmoothed[i - 1] / period) + tr[i];
-      plusSmoothed[i] = plusSmoothed[i - 1] - (plusSmoothed[i - 1] / period) + plusDM[i];
-      minusSmoothed[i] = minusSmoothed[i - 1] - (minusSmoothed[i - 1] / period) + minusDM[i];
-      diPlus[i] = trSmoothed[i] === 0 ? 0 : (100 * plusSmoothed[i] / trSmoothed[i]);
-      diMinus[i] = trSmoothed[i] === 0 ? 0 : (100 * minusSmoothed[i] / trSmoothed[i]);
-      const denom = diPlus[i] + diMinus[i];
-      dx[i] = denom === 0 ? 0 : (100 * Math.abs(diPlus[i] - diMinus[i]) / denom);
+
+    function stateText(v) {
+      if (v === 1) return '<span class="Bullish">Bullish</span>';
+      if (v === -1) return '<span class="Bearish">Bearish</span>';
+      return '<span class="muted">Neutral</span>';
     }
-    let dxSeed = 0; const adxStart = period * 2;
-    for (let i = period + 1; i <= adxStart && i < len; i++) dxSeed += dx[i];
-    if (adxStart < len) adx[adxStart] = dxSeed / period;
-    for (let i = adxStart + 1; i < len; i++) adx[i] = ((adx[i - 1] * (period - 1)) + dx[i]) / period;
-    return { adx, diPlus, diMinus };
-  }
 
-  return { getSupertrendState, getHtfAdxLabel };
-})();
+    function adxClass(label) {
+      if (!label) return '';
+      if (label.startsWith('Ranged')) return 'Ranged';
+      if (label.startsWith('Weak')) return 'Weak';
+      if (label.startsWith('Strong')) return 'Strong';
+      if (label.startsWith('Mature')) return 'Mature';
+      return '';
+    }
 
-window.CTraderBridge = (function () {
-  function readContextFromQuery() {
-    const params = new URLSearchParams(window.location.search);
-    return {
-      id: params.get('id') || '',
-      theme: params.get('theme') || 'light',
-      symbol: params.get('symbol') || '',
-      platform: params.get('platform') || 'browser',
-      placement: params.get('placement') || '',
-      mode: params.get('mode') || ''
+    function tvInterval(tf) {
+      switch (tf) {
+        case 'Minute5': return '5';
+        case 'Minute15': return '15';
+        case 'Minute30': return '30';
+        case 'Hour': return '60';
+        case 'Hour4': return '240';
+        case 'Daily': return '1D';
+        case 'Weekly': return '1W';
+        default: return '60';
+      }
+    }
+
+    function renderResults() {
+      const maxResults = Number($('maxResults').value || 150);
+      const filtered = state.matchedSymbols.filter(m => isTagAllowed(m.HtfAdxLabel));
+      $('matchCount').textContent = String(state.matchedSymbols.length);
+      $('visibleCount').textContent = `Visible: ${filtered.length}`;
+      $('resultMeta').textContent = state.sortedByAdx ? 'Order: ADX Tag Sorted' : 'Order: Scan Order';
+      const tbody = $('resultsBody');
+      tbody.innerHTML = '';
+
+      filtered.slice(0, maxResults).forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        const ticker = item.SymbolName.split('.')[0];
+        const ex1 = $('exchange1').value;
+        const ex2 = $('exchange2').value;
+        const intv = tvInterval($('tf2').value);
+        const l1 = ex1 ? `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(ex1 + ':' + ticker)}&interval=${encodeURIComponent(intv)}` : '';
+        const l2 = ex2 ? `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(ex2 + ':' + ticker)}&interval=${encodeURIComponent(intv)}` : '';
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td><strong>${item.SymbolName}</strong></td>
+          <td><span class="tag ${adxClass(item.HtfAdxLabel)}">${item.HtfAdxLabel}</span></td>
+          <td>${stateText(item.Tf1State)}</td>
+          <td>${stateText(item.Tf2State)}</td>
+          <td>
+            ${l1 ? `<a href="${l1}" target="_blank" style="color:#8ec5ff">EX1</a>` : ''}
+            ${l2 ? ` | <a href="${l2}" target="_blank" style="color:#8ec5ff">EX2</a>` : ''}
+          </td>`;
+        tbody.appendChild(tr);
+      });
+
+      if (!filtered.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="6" class="muted">No matched symbols for the current tag filters.</td>';
+        tbody.appendChild(tr);
+      }
+    }
+
+    function setStatus(short, full) {
+      $('statusShort').textContent = short;
+      $('statusText').textContent = full;
+    }
+
+    function refreshActive() {
+      $('activeCount').textContent = String(state.activeJobs.length);
+      if (!state.activeJobs.length) {
+        $('activeJobsText').textContent = 'Active: -';
+        return;
+      }
+      $('activeJobsText').textContent = 'Active:\n' + state.activeJobs.map(j => `[${j.position}] ${j.symbol} | ${j.stage}`).join('\n');
+    }
+
+    function sortByAdx() {
+      if (!state.matchedSymbols.length) {
+        setStatus('No results', 'No results to sort.');
+        return;
+      }
+      state.matchedSymbols.sort((a, b) => {
+        const r = getAdxTagRank(a.HtfAdxLabel) - getAdxTagRank(b.HtfAdxLabel);
+        return r !== 0 ? r : a.SymbolName.localeCompare(b.SymbolName);
+      });
+      state.sortedByAdx = true;
+      setStatus('Sorted', 'Results sorted by ADX tag.');
+      renderResults();
+    }
+
+    function loadSampleData() {
+      state.matchedSymbols = [
+        { SymbolName: 'AAPL.US', HtfAdxLabel: 'Strong Bull', Tf1State: 1, Tf2State: -1 },
+        { SymbolName: 'MSFT.US', HtfAdxLabel: 'Weak Bull', Tf1State: 1, Tf2State: -1 },
+        { SymbolName: 'NVDA.US', HtfAdxLabel: 'Mature Bull', Tf1State: 1, Tf2State: -1 },
+        { SymbolName: 'TSLA.US', HtfAdxLabel: 'Ranged Bear', Tf1State: -1, Tf2State: -1 },
+        { SymbolName: 'AMZN.US', HtfAdxLabel: 'Strong Bear', Tf1State: -1, Tf2State: -1 },
+        { SymbolName: 'META.US', HtfAdxLabel: 'Weak Bear', Tf1State: -1, Tf2State: 1 },
+        { SymbolName: 'AMD.US', HtfAdxLabel: 'Ranged Bull', Tf1State: 1, Tf2State: 1 }
+      ];
+      state.sortedByAdx = false;
+      state.activeJobs = [];
+      state.total = state.matchedSymbols.length;
+      setStatus('Ready', 'Sample results loaded. This is a UI demo until you connect it to your cTrader WebView plugin.');
+      refreshActive();
+      renderResults();
+      buildTelegramPreview();
+    }
+
+    function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function runDemoScan() {
+      const market = $('market').value;
+      const symbols = sampleSymbolsByMarket[market] || sampleSymbolsByMarket.US;
+      const labels = ['Strong Bull','Weak Bull','Mature Bull','Ranged Bull','Strong Bear','Weak Bear','Mature Bear','Ranged Bear'];
+      state.matchedSymbols = [];
+      state.sortedByAdx = false;
+      state.total = symbols.length;
+      state.completed = 0;
+      state.scanning = true;
+      state.activeJobs = [];
+      setStatus('Scanning', `Started scan for ${symbols.length} symbols on ${market}.`);
+      refreshActive();
+      renderResults();
+
+      let i = 0;
+      const timer = setInterval(() => {
+        if (i >= symbols.length) {
+          clearInterval(timer);
+          state.scanning = false;
+          state.activeJobs = [];
+          refreshActive();
+          setStatus('Complete', `Scan complete. Matched: ${state.matchedSymbols.length}`);
+          buildTelegramPreview();
+          return;
+        }
+
+        const symbol = symbols[i];
+        state.activeJobs = [{ position: i + 1, symbol, stage: 'Loading ST1' }];
+        refreshActive();
+
+        setTimeout(() => {
+          const item = {
+            SymbolName: symbol,
+            HtfAdxLabel: randomChoice(labels),
+            Tf1State: Math.random() > 0.5 ? 1 : -1,
+            Tf2State: Math.random() > 0.5 ? 1 : -1
+          };
+          const s1 = $('sentiment1').value;
+          const s2 = $('sentiment2').value;
+          const ok1 = s1 === 'Any' || (s1 === 'Bullish' && item.Tf1State === 1) || (s1 === 'Bearish' && item.Tf1State === -1);
+          const ok2 = s2 === 'Any' || (s2 === 'Bullish' && item.Tf2State === 1) || (s2 === 'Bearish' && item.Tf2State === -1);
+          if (ok1 && ok2) state.matchedSymbols.push(item);
+          state.completed++;
+          state.activeJobs = [{ position: i + 1, symbol, stage: 'Done' }];
+          refreshActive();
+          setStatus('Scanning', `Progress ${state.completed} / ${state.total} | Active: 1 | Matches: ${state.matchedSymbols.length}`);
+          renderResults();
+        }, 320);
+
+        i++;
+      }, 650);
+    }
+
+    function buildTelegramPreview() {
+      const filtered = state.matchedSymbols.filter(m => isTagAllowed(m.HtfAdxLabel));
+      if (!filtered.length) {
+        $('telegramPreview').textContent = 'No matched symbols with current tag filters to send.';
+        return;
+      }
+      const market = $('market').value;
+      const ex1 = $('exchange1').value || '';
+      const ex2 = $('exchange2').value || '';
+      const ltf = $('tf2').value;
+      const interval = tvInterval(ltf);
+      const lines = [];
+      lines.push('Screener Results');
+      lines.push(`Market: ${market}`);
+      lines.push(`Order: ${state.sortedByAdx ? 'ADX Tag Sorted' : 'Scan Order'}`);
+      lines.push(`LTF: ${ltf}`);
+      lines.push(`EX1 ${ex1} | EX2 ${ex2}`);
+      lines.push('');
+      filtered.forEach(item => {
+        const ticker = item.SymbolName.split('.')[0];
+        const parts = [`${ticker} | ${item.HtfAdxLabel}`];
+        if (ex1) parts.push(`EX1: https://www.tradingview.com/chart/?symbol=${ex1}:${ticker}&interval=${interval}`);
+        if (ex2) parts.push(`EX2: https://www.tradingview.com/chart/?symbol=${ex2}:${ticker}&interval=${interval}`);
+        lines.push(parts.join(' | '));
+      });
+      $('telegramPreview').textContent = lines.join('\n');
+    }
+
+    init();
+
+    // cTrader WebView integration placeholder.
+    // Replace demo actions with calls to the cTrader WebView SDK/plugin bridge later.
+    window.screenerApp = {
+      setResults(results) {
+        state.matchedSymbols = Array.isArray(results) ? results : [];
+        state.sortedByAdx = false;
+        renderResults();
+        buildTelegramPreview();
+      },
+      setStatus(message) {
+        setStatus('Update', message || '');
+      }
     };
-  }
-  function detectPluginEnvironment() {
-    const context = readContextFromQuery();
-    const hasPluginSignals = Boolean(context.id || context.platform !== 'browser' || context.placement || context.mode === 'plugin');
-    return { isPlugin: hasPluginSignals, context };
-  }
-  async function init() {
-    const env = detectPluginEnvironment();
-    return {
-      ...env,
-      sdkReady: false,
-      note: env.isPlugin ? 'Plugin context detected. Replace stub calls in this file with WV Plugin SDK calls from cTrader docs.' : 'Browser demo mode. No cTrader SDK detected.'
-    };
-  }
-  async function getSymbolsForMarket(marketKey) { return window.SCREENER_CONFIG.demoSymbolsByMarket[marketKey] || []; }
-  async function getBars(symbol, timeframe) {
-    const bars = [];
-    const seed = Array.from(symbol + timeframe).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-    let price = 80 + (seed % 140);
-    for (let i = 0; i < 220; i++) {
-      const wave = Math.sin((i + seed / 10) / 8) * 1.8 + Math.cos((i + seed / 13) / 13) * 1.1;
-      const drift = ((seed % 7) - 3) * 0.03;
-      const open = price;
-      const close = Math.max(1, open + wave + drift);
-      const high = Math.max(open, close) + 0.8 + ((i + seed) % 3) * 0.35;
-      const low = Math.max(0.5, Math.min(open, close) - 0.8 - ((i + seed) % 2) * 0.25);
-      bars.push({ open, high, low, close, time: Date.now() - (220 - i) * 3600000 });
-      price = close;
-    }
-    return bars;
-  }
-  return { init, getSymbolsForMarket, getBars, readContextFromQuery, detectPluginEnvironment };
-})();
-
-(function () {
-  const cfg = window.SCREENER_CONFIG;
-  const indicators = window.ScreenerIndicators;
-  const bridge = window.CTraderBridge;
-  const state = { plugin: null, matchedSymbols: [], isScanning: false, isSortedByAdx: false, jobs: new Map(), completedCount: 0, symbolsToScan: [], nextIndexToStart: 0 };
-  const els = {};
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-
-  async function init() {
-    captureElements();
-    if (!hasRequiredElements()) { console.error('Screener init failed: required DOM elements are missing.'); return; }
-    bindThemeToggle();
-    populateStaticControls();
-    bindEvents();
-    applyMarketSelection();
-    state.plugin = await bridge.init();
-    applyPluginContext();
-    renderResults();
-  }
-
-  function captureElements() {
-    ['marketSelect','modeSelect','exchange1Select','exchange2Select','tf1Select','sentiment1Select','tf2Select','sentiment2Select','atrLengthInput','multiplierInput','adxPeriodInput','batchSizeInput','slowSymbolInput','maxResultsInput','showProgressCheck','scanButton','sortButton','statusText','activeJobsText','pluginContextText','filterRanged','filterWeak','filterStrong','filterMature','resultSummary','orderSummary','resultsBody','mobileCards','themeToggle'].forEach(id => els[id] = document.getElementById(id));
-  }
-
-  function hasRequiredElements() {
-    const required = ['marketSelect','modeSelect','exchange1Select','exchange2Select','tf1Select','sentiment1Select','tf2Select','sentiment2Select','atrLengthInput','multiplierInput','adxPeriodInput','batchSizeInput','slowSymbolInput','maxResultsInput','showProgressCheck','scanButton','sortButton','statusText','activeJobsText','pluginContextText','filterRanged','filterWeak','filterStrong','filterMature','resultSummary','orderSummary','resultsBody','mobileCards'];
-    return required.every(id => els[id]);
-  }
-
-  function populateStaticControls() {
-    fillSelect(els.marketSelect, Object.keys(cfg.markets), 'US');
-    fillSelect(els.tf1Select, cfg.timeframes, 'Daily');
-    fillSelect(els.tf2Select, cfg.timeframes, 'Hour');
-    fillSelect(els.sentiment1Select, cfg.sentiments, 'Bullish');
-    fillSelect(els.sentiment2Select, cfg.sentiments, 'Bearish');
-  }
-
-  function fillSelect(select, options, selected) {
-    select.innerHTML = '';
-    options.forEach(value => {
-      const option = document.createElement('option');
-      option.value = value; option.textContent = value; option.selected = value === selected; select.appendChild(option);
-    });
-  }
-
-  function bindEvents() {
-    els.marketSelect.addEventListener('change', applyMarketSelection);
-    els.scanButton.addEventListener('click', startScan);
-    els.sortButton.addEventListener('click', sortMatchedSymbolsByAdxTag);
-    [els.filterRanged, els.filterWeak, els.filterStrong, els.filterMature].forEach(el => el.addEventListener('change', () => { if (!state.isScanning) renderResults(); }));
-  }
-
-  function bindThemeToggle() {
-    els.themeToggle?.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme') || 'light';
-      applyTheme(current === 'dark' ? 'light' : 'dark');
-    });
-  }
-
-  function resolveTheme(themeValue) {
-    const value = String(themeValue || '').toLowerCase();
-    if (['dark', 'black', 'night'].includes(value)) return 'dark';
-    return 'light';
-  }
-
-  function applyTheme(themeValue) { document.documentElement.setAttribute('data-theme', resolveTheme(themeValue)); }
-
-  function applyPluginContext() {
-    const c = state.plugin.context;
-    applyTheme(c.theme);
-    if (c.mode === 'plugin') els.modeSelect.value = 'plugin';
-    els.pluginContextText.textContent = JSON.stringify({ ...state.plugin }, null, 2);
-  }
-
-  function applyMarketSelection() {
-    const market = els.marketSelect.value || 'US';
-    const config = cfg.markets[market] || cfg.markets.US;
-    fillSelect(els.exchange1Select, config.exchanges, config.exchanges[0]);
-    fillSelect(els.exchange2Select, config.exchanges, config.exchanges[1] || config.exchanges[0]);
-  }
-
-  async function startScan() {
-    if (state.isScanning) { updateStatus('Scan already running...'); return; }
-    state.matchedSymbols = []; state.jobs = new Map(); state.completedCount = 0; state.nextIndexToStart = 0; state.isScanning = true; state.isSortedByAdx = false;
-    els.sortButton.disabled = true; els.scanButton.disabled = true;
-    const market = els.marketSelect.value;
-    state.symbolsToScan = await bridge.getSymbolsForMarket(market);
-    updateStatus(`Started scan for ${state.symbolsToScan.length} symbols on ${market}.`);
-    updateActiveJobs('Active: launching first batch...');
-    renderResults();
-    await fillBatchSlots();
-    finishScan();
-  }
-
-  async function fillBatchSlots() {
-    const batchSize = parseInt(els.batchSizeInput.value, 10) || 5;
-    while (state.nextIndexToStart < state.symbolsToScan.length) {
-      const slice = state.symbolsToScan.slice(state.nextIndexToStart, state.nextIndexToStart + batchSize);
-      const jobs = slice.map((symbol, idx) => runSymbolJob(symbol, state.nextIndexToStart + idx + 1, state.symbolsToScan.length));
-      state.nextIndexToStart += slice.length;
-      await Promise.all(jobs);
-      refreshStatus();
-    }
-  }
-
-  async function runSymbolJob(symbol, position, total) {
-    const tf1 = els.tf1Select.value, tf2 = els.tf2Select.value, sentiment1 = els.sentiment1Select.value, sentiment2 = els.sentiment2Select.value;
-    const atrLength = parseInt(els.atrLengthInput.value, 10) || 10, multiplier = parseFloat(els.multiplierInput.value) || 3, adxPeriod = parseInt(els.adxPeriodInput.value, 10) || 14;
-    state.jobs.set(symbol, { symbol, position, stage: 'Loading ST1' });
-    refreshStatus();
-    const barsTf1 = await bridge.getBars(symbol, tf1);
-    if (!barsTf1 || barsTf1.length < Math.max(Math.max(atrLength + 5, adxPeriod + 5), 20)) return skipJob(symbol, position, total, 'not enough ST1 data');
-    const htfAdxLabel = indicators.getHtfAdxLabel(barsTf1, adxPeriod);
-    const tf1State = indicators.getSupertrendState(barsTf1, atrLength, multiplier);
-    if (!matchesSentiment(tf1State, sentiment1)) return skipJob(symbol, position, total, 'ST1 filter not matched');
-    if (tf1 === tf2) {
-      if (matchesSentiment(tf1State, sentiment2)) { state.matchedSymbols.push({ symbolName: symbol, htfAdxLabel, tf1State, tf2State: tf1State }); updatePartialResults(); }
-      return completeJob(symbol, position, total, 'done');
-    }
-    state.jobs.set(symbol, { symbol, position, stage: 'Loading ST2' });
-    refreshStatus();
-    const barsTf2 = await bridge.getBars(symbol, tf2);
-    if (!barsTf2 || barsTf2.length < Math.max(atrLength + 5, 20)) return skipJob(symbol, position, total, 'not enough ST2 data');
-    const tf2State = indicators.getSupertrendState(barsTf2, atrLength, multiplier);
-    if (matchesSentiment(tf2State, sentiment2)) { state.matchedSymbols.push({ symbolName: symbol, htfAdxLabel, tf1State, tf2State }); updatePartialResults(); }
-    completeJob(symbol, position, total, 'done');
-  }
-
-  function completeJob(symbol, position, total, reason) { state.jobs.delete(symbol); state.completedCount++; updateStatus(`[${position}/${total}] ${symbol} completed: ${reason}`); refreshStatus(); }
-  function skipJob(symbol, position, total, reason) { state.jobs.delete(symbol); state.completedCount++; updateStatus(`[${position}/${total}] ${symbol} skipped: ${reason}`); refreshStatus(); }
-
-  function refreshStatus() {
-    updateStatus(`Progress ${state.completedCount} / ${state.symbolsToScan.length} | Active: ${state.jobs.size} | Matches: ${state.matchedSymbols.length}`);
-    if (!els.showProgressCheck.checked) { els.activeJobsText.style.display = 'none'; els.statusText.style.display = 'none'; return; }
-    els.activeJobsText.style.display = 'block'; els.statusText.style.display = 'block';
-    if (state.jobs.size === 0) { updateActiveJobs('Active: -'); return; }
-    const lines = Array.from(state.jobs.values()).sort((a, b) => a.position - b.position).slice(0, 12).map(j => `[${j.position}] ${j.symbol} | ${j.stage}`);
-    updateActiveJobs('Active:
-' + lines.join('
-'));
-  }
-
-  function finishScan() { state.isScanning = false; els.scanButton.disabled = false; els.sortButton.disabled = state.matchedSymbols.length === 0; renderResults(); updateStatus(`Scan complete. Matched: ${state.matchedSymbols.length}`); updateActiveJobs('Active: -'); }
-  function updatePartialResults() { renderResults(); }
-
-  function renderResults() {
-    const filtered = state.matchedSymbols.filter(m => isTagAllowed(m.htfAdxLabel));
-    els.resultSummary.textContent = `Matched symbols: ${filtered.length}`;
-    els.orderSummary.textContent = `Order: ${state.isSortedByAdx ? 'ADX Tag Sorted' : 'Scan Order'}`;
-    els.resultsBody.innerHTML = ''; els.mobileCards.innerHTML = '';
-    if (filtered.length === 0) {
-      els.resultsBody.innerHTML = '<tr><td colspan="5" class="empty-state">Results will appear here during scan.</td></tr>';
-      els.mobileCards.innerHTML = '<div class="empty-state">Results will appear here during scan.</div>';
-      return;
-    }
-    const maxResults = parseInt(els.maxResultsInput.value, 10) || 150;
-    filtered.slice(0, maxResults).forEach(item => { els.resultsBody.appendChild(buildResultRow(item)); els.mobileCards.appendChild(buildMobileCard(item)); });
-  }
-
-  function buildResultRow(item) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td><div class="symbol-line">${escapeHtml(item.symbolName)}</div></td><td>${buildTagHtml(item.htfAdxLabel)}</td><td>${stateToText(item.tf1State)}</td><td>${stateToText(item.tf2State)}</td><td>${buildLinksHtml(item.symbolName)}</td>`;
-    wireCopyButton(tr, item.symbolName); return tr;
-  }
-
-  function buildMobileCard(item) {
-    const div = document.createElement('article'); div.className = 'result-card';
-    div.innerHTML = `<h3>${escapeHtml(item.symbolName)}</h3><div class="result-meta">${buildTagHtml(item.htfAdxLabel)}<span class="tag nil">ST1: ${stateToText(item.tf1State)}</span><span class="tag nil">ST2: ${stateToText(item.tf2State)}</span></div>${buildLinksHtml(item.symbolName)}`;
-    wireCopyButton(div, item.symbolName); return div;
-  }
-
-  function buildLinksHtml(symbolName) {
-    const ticker = symbolName.split('.')[0], ex1 = els.exchange1Select.value || '', ex2 = els.exchange2Select.value || '', ltfInterval = cfg.timeframeToTv[els.tf2Select.value] || '60';
-    const links = [];
-    if (ex1) links.push(`<a target="_blank" rel="noopener noreferrer" href="https://www.tradingview.com/chart/?symbol=${encodeURIComponent(ex1 + ':' + ticker)}&interval=${encodeURIComponent(ltfInterval)}">EX1</a>`);
-    if (ex2) links.push(`<a target="_blank" rel="noopener noreferrer" href="https://www.tradingview.com/chart/?symbol=${encodeURIComponent(ex2 + ':' + ticker)}&interval=${encodeURIComponent(ltfInterval)}">EX2</a>`);
-    links.push(`<button class="copy-button" type="button" data-symbol="${escapeHtml(symbolName)}">Copy</button>`);
-    return `<div class="link-group">${links.join('')}</div>`;
-  }
-
-  function wireCopyButton(root, symbolName) {
-    const button = root.querySelector('.copy-button'); if (!button) return;
-    button.addEventListener('click', async () => {
-      try { await navigator.clipboard.writeText(symbolName); button.textContent = 'Copied'; setTimeout(() => button.textContent = 'Copy', 1200); }
-      catch (_) { button.textContent = 'Copy failed'; }
-    });
-  }
-
-  function buildTagHtml(label) {
-    const cls = label.toLowerCase().includes('ranged') ? 'ranged' : label.toLowerCase().includes('weak') ? 'weak' : label.toLowerCase().includes('strong') ? 'strong' : label.toLowerCase().includes('mature') ? 'mature' : 'nil';
-    return `<span class="tag ${cls}">${escapeHtml(label)}</span>`;
-  }
-
-  function sortMatchedSymbolsByAdxTag() {
-    if (state.isScanning) { updateStatus('Wait for scan completion before sorting.'); return; }
-    if (state.matchedSymbols.length === 0) { updateStatus('No results to sort.'); return; }
-    state.matchedSymbols.sort((a, b) => { const rankCompare = (cfg.adxTagRank[a.htfAdxLabel] || 99) - (cfg.adxTagRank[b.htfAdxLabel] || 99); if (rankCompare !== 0) return rankCompare; return a.symbolName.localeCompare(b.symbolName); });
-    state.isSortedByAdx = true; renderResults(); updateStatus('Results sorted by ADX tag.');
-  }
-
-  function isTagAllowed(tag) {
-    if (!tag) return false;
-    const ranged = tag.toLowerCase().startsWith('ranged'), weak = tag.toLowerCase().startsWith('weak'), strong = tag.toLowerCase().startsWith('strong'), mature = tag.toLowerCase().startsWith('mature');
-    if (ranged && !els.filterRanged.checked) return false;
-    if (weak && !els.filterWeak.checked) return false;
-    if (strong && !els.filterStrong.checked) return false;
-    if (mature && !els.filterMature.checked) return false;
-    return ranged || weak || strong || mature;
-  }
-
-  function matchesSentiment(stateValue, sentiment) { if (sentiment === 'Any') return true; if (sentiment === 'Bullish') return stateValue === 1; if (sentiment === 'Bearish') return stateValue === -1; return false; }
-  function stateToText(value) { if (value === 1) return 'Bullish'; if (value === -1) return 'Bearish'; return 'Neutral'; }
-  function updateStatus(text) { els.statusText.textContent = text; }
-  function updateActiveJobs(text) { els.activeJobsText.textContent = text; }
-  function escapeHtml(value) { return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
-})();
   </script>
 </body>
 </html>
