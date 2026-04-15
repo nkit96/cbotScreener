@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>multi-market-supertrend-screener</title>
+  <title>Multi-Market Supertrend Screener</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -11,133 +11,172 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">cTrader WebView Plugin</p>
+      <h1>Multi-Market Supertrend Screener</h1>
+      <p class="subtext">Phase 2 starter that ports your cBot logic to a hosted web app with cTrader-aware context and browser demo fallback.</p>
+    </div>
+    <div class="topbar-actions">
+      <button id="themeToggle" class="icon-button" type="button" aria-label="Toggle theme">◐</button>
+    </div>
+  </header>
 
-  <div class="app-shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">WebView plugin starter</p>
-        <h1>Multi-Market Supertrend Screener</h1>
-        <p class="subtext">Phase 1 UI clone of your cBot with Telegram removed, theme toggle added, and TradingView links beside every symbol.</p>
+  <main id="main" class="app-shell">
+    <section class="panel controls-panel">
+      <div class="section-title-wrap">
+        <h2>Scanner controls</h2>
+        <span class="badge">Phase 2</span>
       </div>
-      <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to dark mode">🌙</button>
-    </header>
 
-    <main id="main" class="layout">
-      <aside class="control-panel">
-        <section class="panel-card">
-          <h2>Market Setup</h2>
-          <div class="field-grid">
-            <label>
-              <span>Market</span>
-              <select id="marketSelect"></select>
-            </label>
-            <label>
-              <span>Exchange 1</span>
-              <select id="exchange1Select"></select>
-            </label>
-            <label>
-              <span>Exchange 2</span>
-              <select id="exchange2Select"></select>
-            </label>
-          </div>
-        </section>
+      <div class="grid-two">
+        <label class="field">
+          <span>Market</span>
+          <select id="marketSelect"></select>
+        </label>
+        <label class="field">
+          <span>Mode</span>
+          <select id="modeSelect">
+            <option value="demo">Demo</option>
+            <option value="plugin">Plugin</option>
+          </select>
+        </label>
+      </div>
 
-        <section class="panel-card">
-          <h2>Supertrend 1</h2>
-          <div class="field-grid">
-            <label>
-              <span>Timeframe</span>
-              <select id="tf1Select"></select>
-            </label>
-            <label>
-              <span>Sentiment</span>
-              <select id="sentiment1Select"></select>
-            </label>
-          </div>
-        </section>
+      <div class="grid-two">
+        <label class="field">
+          <span>Exchange 1</span>
+          <select id="exchange1Select"></select>
+        </label>
+        <label class="field">
+          <span>Exchange 2</span>
+          <select id="exchange2Select"></select>
+        </label>
+      </div>
 
-        <section class="panel-card">
-          <h2>Supertrend 2</h2>
-          <div class="field-grid">
-            <label>
-              <span>Timeframe</span>
-              <select id="tf2Select"></select>
-            </label>
-            <label>
-              <span>Sentiment</span>
-              <select id="sentiment2Select"></select>
-            </label>
-          </div>
-        </section>
-
-        <section class="panel-card">
-          <h2>Scan Controls</h2>
-          <div class="field-grid compact-grid">
-            <label>
-              <span>Batch Size</span>
-              <input id="batchSizeInput" type="number" min="1" max="20" value="5" />
-            </label>
-            <label>
-              <span>Slow Sym Sec</span>
-              <input id="slowSecondsInput" type="number" min="2" max="60" value="8" />
-            </label>
-            <label>
-              <span>Max Results</span>
-              <input id="maxResultsInput" type="number" min="10" value="150" />
-            </label>
-          </div>
-          <div class="button-row">
-            <button id="scanBtn" class="btn btn-primary" type="button">Scan Matching Symbols</button>
-            <button id="sortBtn" class="btn btn-secondary" type="button">Sort by ADX</button>
-          </div>
-          <label class="checkbox-row">
-            <input id="showProgressInput" type="checkbox" checked />
-            <span>Show progress / updates</span>
+      <section class="subpanel">
+        <h3>Supertrend 1</h3>
+        <div class="grid-two">
+          <label class="field">
+            <span>Timeframe</span>
+            <select id="tf1Select"></select>
           </label>
-        </section>
-
-        <section class="panel-card status-card">
-          <h2>Status</h2>
-          <p id="statusText">Ready. Choose filters and click Scan.</p>
-          <pre id="activeJobsText">Active: -</pre>
-        </section>
-      </aside>
-
-      <section class="results-panel">
-        <div class="results-header panel-card">
-          <div>
-            <h2>Matched Symbols</h2>
-            <p class="subtext">Table on large screens, cards on mobile. Every row includes TradingView actions for Exchange 1 and Exchange 2 using the selected LTF timeframe.</p>
-          </div>
-          <div class="chips" id="tagFilters"></div>
+          <label class="field">
+            <span>Sentiment</span>
+            <select id="sentiment1Select"></select>
+          </label>
         </div>
-
-        <div class="panel-card metrics-row" id="metricsRow"></div>
-
-        <div class="panel-card table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Symbol</th>
-                <th>ADX Tag</th>
-                <th>ST1</th>
-                <th>ST2</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="resultsTableBody"></tbody>
-          </table>
-          <div id="emptyState" class="empty-state">
-            <h3>No results yet</h3>
-            <p>Press scan to load the first screener list. In Phase 2, this will connect to live cTrader scan data.</p>
-          </div>
-        </div>
-
-        <div id="mobileCards" class="mobile-cards"></div>
       </section>
-    </main>
-  </div>
 
-  <script src="./app.js" defer></script>
+      <section class="subpanel">
+        <h3>Supertrend 2</h3>
+        <div class="grid-two">
+          <label class="field">
+            <span>Timeframe</span>
+            <select id="tf2Select"></select>
+          </label>
+          <label class="field">
+            <span>Sentiment</span>
+            <select id="sentiment2Select"></select>
+          </label>
+        </div>
+      </section>
+
+      <section class="subpanel">
+        <h3>Engine settings</h3>
+        <div class="grid-two">
+          <label class="field">
+            <span>ATR Length</span>
+            <input id="atrLengthInput" type="number" min="1" value="10" />
+          </label>
+          <label class="field">
+            <span>Multiplier</span>
+            <input id="multiplierInput" type="number" step="0.1" min="0.1" value="3" />
+          </label>
+        </div>
+        <div class="grid-two">
+          <label class="field">
+            <span>ADX Period</span>
+            <input id="adxPeriodInput" type="number" min="5" value="14" />
+          </label>
+          <label class="field">
+            <span>Batch Size</span>
+            <input id="batchSizeInput" type="number" min="1" max="20" value="5" />
+          </label>
+        </div>
+        <div class="grid-two">
+          <label class="field">
+            <span>Slow Symbol Seconds</span>
+            <input id="slowSymbolInput" type="number" min="2" max="60" value="8" />
+          </label>
+          <label class="field">
+            <span>Max Results</span>
+            <input id="maxResultsInput" type="number" min="10" value="150" />
+          </label>
+        </div>
+      </section>
+
+      <div class="inline-options">
+        <label class="checkbox"><input id="showProgressCheck" type="checkbox" checked /> Show progress / updates</label>
+      </div>
+
+      <div class="button-row">
+        <button id="scanButton" class="primary-button" type="button">Scan matching symbols</button>
+        <button id="sortButton" class="secondary-button" type="button" disabled>Sort by ADX</button>
+      </div>
+
+      <div class="status-box">
+        <p id="statusText">Ready. Choose filters and click Scan.</p>
+        <pre id="activeJobsText">Active: -</pre>
+      </div>
+
+      <div class="status-box muted-box">
+        <p><strong>Plugin context</strong></p>
+        <pre id="pluginContextText">Loading context…</pre>
+      </div>
+    </section>
+
+    <section class="panel results-panel">
+      <div class="results-header">
+        <div>
+          <h2>Matched symbols</h2>
+          <p class="subtext">Live-ready result layout based on your cBot scan order, ADX labels, filters, and TradingView links.</p>
+        </div>
+        <div class="filter-pills">
+          <label class="checkbox-pill"><input id="filterRanged" type="checkbox" checked /> Ranged</label>
+          <label class="checkbox-pill"><input id="filterWeak" type="checkbox" checked /> Weak</label>
+          <label class="checkbox-pill"><input id="filterStrong" type="checkbox" checked /> Strong</label>
+          <label class="checkbox-pill"><input id="filterMature" type="checkbox" checked /> Mature</label>
+        </div>
+      </div>
+
+      <div class="summary-bar">
+        <span id="resultSummary">Matched symbols: 0</span>
+        <span id="orderSummary">Order: Scan Order</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>HTF ADX</th>
+              <th>ST1</th>
+              <th>ST2</th>
+              <th>Links</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+
+      <div id="mobileCards" class="mobile-cards"></div>
+    </section>
+  </main>
+
+  <script src="./config.js"></script>
+  <script src="./indicators.js"></script>
+  <script src="./sdk.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
