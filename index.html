@@ -1,699 +1,478 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>multi-market-supertrend-screener-webview</title>
+  <title>Time Discipline Quotes</title>
+  <meta name="description" content="A static quote site that slaps you out of wasting time. Click anywhere to get a new hard-hitting quote." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #0b1220;
-      --panel: #121a2b;
-      --panel-2: #192338;
-      --line: #2b3852;
-      --text: #eef4ff;
-      --muted: #9fb0cf;
-      --accent: #2d6cdf;
-      --accent-2: #7a5af8;
-      --good: #23c16b;
-      --warn: #f4b740;
-      --bad: #ef5350;
-      --chip: #22314d;
-      --radius: 14px;
-      --shadow: 0 14px 40px rgba(0,0,0,.35);
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      --text-3xl: clamp(2.5rem, 1rem + 4vw, 5rem);
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --font-display: 'Archivo Black', Impact, sans-serif;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --color-bg: #f6f1e8;
+      --color-surface: #fffaf2;
+      --color-surface-2: #efe6d9;
+      --color-border: rgba(31, 20, 9, 0.12);
+      --color-text: #18120c;
+      --color-text-muted: #5b5147;
+      --color-text-faint: #857a6f;
+      --color-primary: #a61b1b;
+      --color-primary-hover: #7f1212;
+      --color-primary-highlight: rgba(166, 27, 27, 0.12);
+      --color-warning: #111111;
+      --shadow-lg: 0 18px 60px rgba(24, 18, 12, 0.12);
+      --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
-    * { box-sizing: border-box; }
+
+    [data-theme="dark"] {
+      --color-bg: #090909;
+      --color-surface: #111111;
+      --color-surface-2: #171717;
+      --color-border: rgba(255, 255, 255, 0.1);
+      --color-text: #f2ece3;
+      --color-text-muted: #b8afa5;
+      --color-text-faint: #7c746b;
+      --color-primary: #ff3b30;
+      --color-primary-hover: #c91e14;
+      --color-primary-highlight: rgba(255, 59, 48, 0.12);
+      --color-warning: #f2ece3;
+      --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      text-size-adjust: none;
+      scroll-behavior: smooth;
+    }
     body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: linear-gradient(180deg, #09101d 0%, #0c1424 100%);
-      color: var(--text);
-      min-height: 100vh;
-    }
-    .app {
-      max-width: 1300px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    .titlebar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .logo {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      box-shadow: var(--shadow);
-      font-weight: 800;
-    }
-    .brand h1 {
-      margin: 0;
-      font-size: 20px;
-      line-height: 1.2;
-    }
-    .brand p {
-      margin: 2px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .badge {
-      background: #15223a;
-      border: 1px solid var(--line);
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .layout {
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 16px;
-    }
-    .card {
-      background: rgba(18,26,43,.95);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .left, .right { padding: 16px; }
-    .section-title {
-      margin: 0 0 10px;
-      font-size: 14px;
-      color: var(--text);
-    }
-    .sub {
-      margin: 0 0 12px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .field {
-      margin-bottom: 12px;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    select, input[type="text"], input[type="number"], textarea {
-      width: 100%;
-      background: var(--panel-2);
-      color: var(--text);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px 12px;
-      outline: none;
-    }
-    select:focus, input:focus, textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(45,108,223,.2);
-    }
-    .row2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .checks {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 8px 0 14px;
-    }
-    .check {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--chip);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 8px 10px;
-      font-size: 13px;
-      color: var(--text);
-    }
-    .check input { accent-color: var(--accent); }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    button {
-      border: 0;
-      border-radius: 10px;
-      padding: 11px 14px;
-      font-weight: 700;
-      color: white;
+      min-height: 100dvh;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--color-text);
+      background:
+        radial-gradient(circle at top left, rgba(255,59,48,0.18), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(255,255,255,0.06), transparent 28%),
+        var(--color-bg);
+      overflow: hidden;
       cursor: pointer;
     }
-    .btn-scan { background: var(--accent); }
-    .btn-sort { background: var(--accent-2); }
-    .btn-secondary { background: #344667; }
-    .status-grid {
+    button, input, textarea, select { font: inherit; }
+    a, button { transition: all var(--transition-interactive); }
+    :focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 3px;
+      border-radius: var(--radius-sm);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 50%;
+      top: -48px;
+      transform: translateX(-50%);
+      background: var(--color-primary);
+      color: white;
+      padding: var(--space-3) var(--space-4);
+      z-index: 50;
+      text-decoration: none;
+    }
+    .skip-link:focus { top: var(--space-3); }
+
+    .shell {
+      min-height: 100dvh;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 14px;
+      grid-template-rows: auto 1fr auto;
+      padding: clamp(var(--space-4), 3vw, var(--space-8));
+      gap: var(--space-6);
     }
-    .stat {
-      background: var(--panel-2);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-    }
-    .stat .k { color: var(--muted); font-size: 12px; margin-bottom: 6px; }
-    .stat .v { font-size: 18px; font-weight: 800; }
-    .status-box, .active-box {
-      background: var(--panel-2);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-    .status-box p, .active-box pre {
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .results-head {
+
+    .topbar, .footer {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+
+    .brand svg {
+      width: 28px;
+      height: 28px;
+      color: var(--color-primary);
+      flex: none;
+    }
+
+    .theme-toggle {
+      min-width: 44px;
+      min-height: 44px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text);
+      border-radius: var(--radius-full, 999px);
+      display: inline-grid;
+      place-items: center;
+      box-shadow: var(--shadow-lg);
+      cursor: pointer;
+    }
+    .theme-toggle:hover { background: var(--color-surface-2); }
+
+    .stage {
+      display: grid;
+      place-items: center;
+    }
+
+    .quote-card {
+      width: min(100%, 980px);
+      min-height: min(72dvh, 760px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: clamp(var(--space-6), 2vw, var(--space-10));
+      padding: clamp(var(--space-6), 4vw, var(--space-12));
+      border: 1px solid var(--color-border);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface) 85%, transparent), color-mix(in srgb, var(--color-surface-2) 95%, transparent));
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      isolation: isolate;
+    }
+
+    .quote-card::before,
+    .quote-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .quote-card::before {
+      background:
+        linear-gradient(90deg, transparent 0 94%, rgba(255,255,255,0.06) 94% 100%),
+        linear-gradient(transparent 0 96%, rgba(255,255,255,0.04) 96% 100%);
+      background-size: 18px 18px;
+      mix-blend-mode: soft-light;
+      opacity: 0.4;
+      z-index: -2;
+    }
+
+    .quote-card::after {
+      border: 3px solid var(--color-primary);
+      inset: 16px;
+      opacity: 0.85;
+      z-index: -1;
+    }
+
+    .eyebrow {
+      display: flex;
       flex-wrap: wrap;
-      margin-bottom: 10px;
+      justify-content: space-between;
+      gap: var(--space-3);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
     }
-    .pill {
-      padding: 6px 10px;
+
+    .quote-wrap {
+      display: grid;
+      align-content: center;
+      gap: var(--space-6);
+    }
+
+    .quote {
+      font-family: var(--font-display);
+      font-size: clamp(2.3rem, 6vw, 6.5rem);
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      max-width: 12ch;
+      transition: transform 220ms ease, opacity 220ms ease;
+      text-wrap: balance;
+    }
+
+    .desc {
+      font-size: var(--text-lg);
+      line-height: 1.35;
+      max-width: 42ch;
+      color: var(--color-text-muted);
+      transition: transform 220ms ease, opacity 220ms ease;
+    }
+
+    .accent {
+      color: var(--color-primary);
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4);
+      align-items: end;
+    }
+
+    .hint, .counter {
+      border-top: 1px solid var(--color-border);
+      padding-top: var(--space-4);
+      font-size: var(--text-sm);
+      color: var(--color-text-faint);
+    }
+
+    .counter {
+      text-align: right;
+    }
+
+    .flash {
+      position: fixed;
+      width: 18px;
+      height: 18px;
       border-radius: 999px;
-      font-size: 12px;
-      background: var(--chip);
-      border: 1px solid var(--line);
-      color: var(--muted);
+      background: var(--color-primary);
+      transform: translate(-50%, -50%) scale(0);
+      pointer-events: none;
+      opacity: 0;
+      filter: blur(1px);
     }
-    .table-wrap {
-      overflow: auto;
-      border: 1px solid var(--line);
-      border-radius: 12px;
+
+    .animate-out .quote,
+    .animate-out .desc {
+      opacity: 0;
+      transform: translateY(10px);
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 720px;
-      background: var(--panel-2);
+
+    .animate-in .quote,
+    .animate-in .desc {
+      animation: slamIn 260ms cubic-bezier(0.2, 0.9, 0.2, 1);
     }
-    th, td {
-      padding: 12px 10px;
-      text-align: left;
-      border-bottom: 1px solid var(--line);
-      font-size: 13px;
+
+    @keyframes slamIn {
+      0% { opacity: 0; transform: translateY(12px) scale(0.985); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
-    th {
-      color: var(--muted);
-      position: sticky;
-      top: 0;
-      background: #1b2740;
-      z-index: 1;
+
+    @keyframes pulseFlash {
+      0% { opacity: 0.45; transform: translate(-50%, -50%) scale(0); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(14); }
     }
-    .tag {
-      display: inline-block;
-      padding: 5px 9px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
+
+    @media (max-width: 720px) {
+      .shell { padding: var(--space-4); }
+      .quote-card { min-height: 76dvh; }
+      .meta { grid-template-columns: 1fr; }
+      .counter { text-align: left; }
+      .quote { max-width: 100%; }
+      .desc { font-size: var(--text-base); }
     }
-    .Ranged { background: rgba(244,183,64,.18); color: #ffd26a; }
-    .Weak { background: rgba(45,156,219,.18); color: #79d0ff; }
-    .Strong { background: rgba(35,193,107,.16); color: #78f0ae; }
-    .Mature { background: rgba(122,90,248,.18); color: #c9b6ff; }
-    .Bullish { color: #78f0ae; font-weight: 700; }
-    .Bearish { color: #ff8d89; font-weight: 700; }
-    .muted { color: var(--muted); }
-    .footer-note {
-      margin-top: 12px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
-      font-size: 12px !important;
-    }
-    @media (max-width: 980px) {
-      .layout { grid-template-columns: 1fr; }
-      .status-grid { grid-template-columns: 1fr; }
-      .row2 { grid-template-columns: 1fr; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="titlebar">
-      <div class="brand">
-        <div class="logo">MS</div>
-        <div>
-          <h1>Multi-Market Supertrend Screener</h1>
-          <p>Single-file WebView UI mock based on your cBot panel.</p>
-        </div>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="flash" aria-hidden="true"></div>
+  <div class="shell" id="appShell">
+    <header class="topbar">
+      <div class="brand" aria-label="Time Discipline">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="6" y="6" width="52" height="52" stroke="currentColor" stroke-width="6"/>
+          <path d="M32 14V32L43 39" stroke="currentColor" stroke-width="6" stroke-linecap="square"/>
+          <path d="M20 20L44 44" stroke="currentColor" stroke-width="4" opacity="0.9"/>
+        </svg>
+        <span>Time does not wait</span>
       </div>
-      <div class="badge">Single HTML file · GitHub Pages ready</div>
-    </div>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to light mode">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </header>
 
-    <div class="layout">
-      <div class="card left">
-        <h2 class="section-title">Scan setup</h2>
-        <p class="sub">This reproduces the controls from your cBot: market, exchanges, two Supertrend filters, result tag filters, sorting, progress, and Telegram message preview.</p>
-
-        <div class="field">
-          <label for="market">Market</label>
-          <select id="market"></select>
+    <main class="stage" id="main">
+      <section class="quote-card animate-in" id="quoteCard" aria-live="polite">
+        <div class="eyebrow">
+          <span>Anti-waste manifesto</span>
+          <span id="label">Tap anywhere for another hit</span>
         </div>
 
-        <div class="row2">
-          <div class="field">
-            <label for="exchange1">Exchange 1</label>
-            <select id="exchange1"></select>
-          </div>
-          <div class="field">
-            <label for="exchange2">Exchange 2</label>
-            <select id="exchange2"></select>
-          </div>
+        <div class="quote-wrap">
+          <h1 class="quote" id="quoteText">YOU ARE NOT TIRED. YOU ARE DISTRACTED.</h1>
+          <p class="desc" id="quoteDesc">Every extra swipe is a quiet decision to hand your goals to someone else’s algorithm. Discipline is choosing your future over cheap stimulation.</p>
         </div>
 
-        <h3 class="section-title">Supertrend 1</h3>
-        <div class="row2">
-          <div class="field">
-            <label for="tf1">Timeframe</label>
-            <select id="tf1"></select>
-          </div>
-          <div class="field">
-            <label for="sentiment1">Sentiment</label>
-            <select id="sentiment1"></select>
-          </div>
+        <div class="meta">
+          <p class="hint">Click, tap, or press <span class="accent">space</span> to rotate the next brutal reminder.</p>
+          <p class="counter"><span id="quoteIndex">01</span> / <span id="quoteTotal">14</span></p>
         </div>
+      </section>
+    </main>
 
-        <h3 class="section-title">Supertrend 2</h3>
-        <div class="row2">
-          <div class="field">
-            <label for="tf2">Timeframe</label>
-            <select id="tf2"></select>
-          </div>
-          <div class="field">
-            <label for="sentiment2">Sentiment</label>
-            <select id="sentiment2"></select>
-          </div>
-        </div>
-
-        <h3 class="section-title">Parameters</h3>
-        <div class="row2">
-          <div class="field">
-            <label for="atrLength">ATR Length</label>
-            <input id="atrLength" type="number" value="10" />
-          </div>
-          <div class="field">
-            <label for="multiplier">Multiplier</label>
-            <input id="multiplier" type="number" step="0.1" value="3.0" />
-          </div>
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label for="adxPeriod">ADX Period</label>
-            <input id="adxPeriod" type="number" value="14" />
-          </div>
-          <div class="field">
-            <label for="maxResults">Max Results On Panel</label>
-            <input id="maxResults" type="number" value="150" />
-          </div>
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label for="batchSize">Batch Size</label>
-            <input id="batchSize" type="number" value="5" />
-          </div>
-          <div class="field">
-            <label for="slowSeconds">Slow Symbol Seconds</label>
-            <input id="slowSeconds" type="number" value="8" />
-          </div>
-        </div>
-
-        <h3 class="section-title">Result tag filters</h3>
-        <div class="checks">
-          <label class="check"><input id="fRanged" type="checkbox" checked />Ranged</label>
-          <label class="check"><input id="fWeak" type="checkbox" checked />Weak</label>
-          <label class="check"><input id="fStrong" type="checkbox" checked />Strong</label>
-          <label class="check"><input id="fMature" type="checkbox" checked />Mature</label>
-        </div>
-
-        <div class="field">
-          <label class="check" style="width:max-content"><input id="showProgress" type="checkbox" checked />Show Progress / Updates</label>
-        </div>
-
-        <div class="actions">
-          <button class="btn-scan" id="scanBtn">Scan Matching Symbols</button>
-          <button class="btn-sort" id="sortBtn">Sort by ADX</button>
-                    <button class="btn-secondary" id="sampleBtn">Load Sample Data</button>
-        </div>
-
-        <div class="footer-note">
-          In WebView mode, these buttons can later call cTrader plugin methods instead of local demo data.
-        </div>
-      </div>
-
-      <div class="card right">
-        <div class="status-grid">
-          <div class="stat"><div class="k">Status</div><div class="v" id="statusShort">Ready</div></div>
-          <div class="stat"><div class="k">Active Jobs</div><div class="v" id="activeCount">0</div></div>
-          <div class="stat"><div class="k">Matches</div><div class="v" id="matchCount">0</div></div>
-        </div>
-
-        <div class="status-box" id="statusWrap">
-          <p id="statusText">Ready. Choose filters and click Scan.</p>
-        </div>
-
-        <div class="active-box" id="activeWrap">
-          <pre id="activeJobsText">Active: -</pre>
-        </div>
-
-        <div class="results-head">
-          <div>
-            <h2 class="section-title" style="margin-bottom:4px">Matched Symbols</h2>
-            <div class="muted" id="resultMeta">Order: Scan Order</div>
-          </div>
-          <div class="pill" id="visibleCount">Visible: 0</div>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Symbol</th>
-                <th>ADX Label</th>
-                <th>ST1</th>
-                <th>ST2</th>
-                <th>TV Links</th>
-              </tr>
-            </thead>
-            <tbody id="resultsBody"></tbody>
-          </table>
-        </div>
-
-              </div>
-    </div>
+    <footer class="footer">
+      <p class="hint">Built as a single static page for GitHub Pages.</p>
+      <p class="hint">No excuses. No endless scroll. Just impact.</p>
+    </footer>
   </div>
 
   <script>
-    const marketConfigs = {
-      US: { suffix: '.US', exchanges: ['NYSE', 'NASDAQ', 'AMEX'] },
-      EU: { suffix: '.EU', exchanges: ['XETR', 'EURONEXT', 'FWB'] },
-      UK: { suffix: '.UK', exchanges: ['LSE'] },
-      DE: { suffix: '.DE', exchanges: ['XETR', 'FWB'] }
-    };
-
-    const timeframes = ['Minute5','Minute15','Minute30','Hour','Hour4','Daily','Weekly'];
-    const sentiments = ['Any','Bullish','Bearish'];
-
-    const sampleSymbolsByMarket = {
-      US: ['AAPL.US','MSFT.US','NVDA.US','TSLA.US','AMZN.US','META.US','AMD.US','NFLX.US','GOOGL.US','JPM.US','PLTR.US','COIN.US'],
-      EU: ['SAP.EU','ADS.EU','MC.EU','AIR.EU','OR.EU','SAN.EU'],
-      UK: ['VOD.UK','SHEL.UK','BARC.UK','HSBA.UK'],
-      DE: ['BMW.DE','SIE.DE','ALV.DE','BAS.DE','DTE.DE']
-    };
-
-    const state = {
-      matchedSymbols: [],
-      sortedByAdx: false,
-      scanning: false,
-      completed: 0,
-      activeJobs: [],
-      total: 0
-    };
-
-    const $ = id => document.getElementById(id);
-
-    function fillSelect(select, items, selected) {
-      select.innerHTML = '';
-      items.forEach(v => {
-        const o = document.createElement('option');
-        o.value = v; o.textContent = v;
-        if (v === selected) o.selected = true;
-        select.appendChild(o);
-      });
-    }
-
-    function init() {
-      fillSelect($('market'), Object.keys(marketConfigs), 'US');
-      fillSelect($('tf1'), timeframes, 'Daily');
-      fillSelect($('tf2'), timeframes, 'Hour');
-      fillSelect($('sentiment1'), sentiments, 'Bullish');
-      fillSelect($('sentiment2'), sentiments, 'Bearish');
-      applyMarketSelection();
-      bind();
-      loadSampleData();
-    }
-
-    function bind() {
-      $('market').addEventListener('change', applyMarketSelection);
-      ['fRanged','fWeak','fStrong','fMature'].forEach(id => $(id).addEventListener('change', renderResults));
-      $('showProgress').addEventListener('change', toggleProgress);
-      $('scanBtn').addEventListener('click', runDemoScan);
-      $('sortBtn').addEventListener('click', sortByAdx);
-      $('sampleBtn').addEventListener('click', loadSampleData);
-    }
-
-    function applyMarketSelection() {
-      const market = $('market').value || 'US';
-      const cfg = marketConfigs[market];
-      fillSelect($('exchange1'), cfg.exchanges, cfg.exchanges[0] || '');
-      fillSelect($('exchange2'), cfg.exchanges, cfg.exchanges[1] || cfg.exchanges[0] || '');
-    }
-
-    function toggleProgress() {
-      const on = $('showProgress').checked;
-      $('statusWrap').style.display = on ? 'block' : 'none';
-      $('activeWrap').style.display = on ? 'block' : 'none';
-    }
-
-    function getAdxTagRank(label) {
-      switch (label) {
-        case 'Strong Bull': return 1;
-        case 'Weak Bull': return 2;
-        case 'Mature Bull': return 3;
-        case 'Ranged Bull': return 4;
-        case 'Strong Bear': return 5;
-        case 'Weak Bear': return 6;
-        case 'Mature Bear': return 7;
-        case 'Ranged Bear': return 8;
-        case 'NiLL': return 9;
-        default: return 99;
+    const quotes = [
+      {
+        line: 'YOU ARE NOT TIRED. YOU ARE DISTRACTED.',
+        desc: 'Every extra swipe is a quiet decision to hand your goals to someone else\'s algorithm. Discipline is choosing your future over cheap stimulation.'
+      },
+      {
+        line: 'DOOMSCROLLING IS SELF-ABANDONMENT.',
+        desc: 'You say you want progress, then donate your sharpest hours to noise. Stop feeding chaos with the time your life depends on.'
+      },
+      {
+        line: 'YOUR PHONE IS NOT REST. IT IS DELAY.',
+        desc: 'Mindless scrolling does not recover your energy; it postpones your responsibility. Real relief comes after focused work, not before it.'
+      },
+      {
+        line: 'WASTED HOURS BECOME A WEAKER LIFE.',
+        desc: 'Time is not just passing; it is shaping you. Repeated drift turns ambition into regret, one harmless-looking minute at a time.'
+      },
+      {
+        line: 'DISCIPLINE IS HARD. REGRET IS HARDER.',
+        desc: 'Pick your pain on purpose. The sting of focus is temporary; the ache of wasted potential follows you for years.'
+      },
+      {
+        line: 'EVERY TAP TRAINS YOUR CHARACTER.',
+        desc: 'You are rehearsing a self with every tiny action. Click toward control, not compulsion.'
+      },
+      {
+        line: 'YOU CANNOT BUILD A SERIOUS LIFE WITH FRAGMENTED ATTENTION.',
+        desc: 'Great work demands depth. Doomscrolling keeps your mind shallow, reactive, and easy to own.'
+      },
+      {
+        line: 'ENTERTAINMENT IS CHEAP. PURPOSE IS EARNED.',
+        desc: 'Anyone can burn an evening. Few can hold the line, sit down, and do what matters without applause.'
+      },
+      {
+        line: 'THE FEED PROFITS WHEN YOU FORGET YOUR MISSION.',
+        desc: 'Platforms win when your standards collapse into impulse. Protect your attention like it is capital, because it is.'
+      },
+      {
+        line: 'MOTIVATION IS MOOD. DISCIPLINE IS IDENTITY.',
+        desc: 'If you wait to feel ready, you will stay average. Serious people act before emotion agrees.'
+      },
+      {
+        line: 'LATE NIGHTS OF SCROLLING CREATE EARLY MORNINGS OF SHAME.',
+        desc: 'What feels harmless at midnight becomes weakness at sunrise. Guard the hours that decide tomorrow.'
+      },
+      {
+        line: 'YOU DO NOT NEED MORE CONTENT. YOU NEED MORE CONTROL.',
+        desc: 'Consumption feels productive when creation feels hard. That is exactly why discipline matters.'
+      },
+      {
+        line: 'NO ONE IS COMING TO RESCUE YOUR SCHEDULE.',
+        desc: 'Not productivity videos, not inspiration, not perfect timing. The rescue is boring: decide, begin, repeat.'
+      },
+      {
+        line: 'A STRONG MIND DOES NOT CHASE EVERY NOVELTY.',
+        desc: 'Attention is power. Keep it. Train it. Aim it where your future actually lives.'
       }
+    ];
+
+    const quoteText = document.getElementById('quoteText');
+    const quoteDesc = document.getElementById('quoteDesc');
+    const quoteIndex = document.getElementById('quoteIndex');
+    const quoteTotal = document.getElementById('quoteTotal');
+    const quoteCard = document.getElementById('quoteCard');
+    const flash = document.querySelector('.flash');
+    const label = document.getElementById('label');
+    const themeToggle = document.querySelector('[data-theme-toggle]');
+    const root = document.documentElement;
+
+    let currentIndex = 0;
+    let theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    root.setAttribute('data-theme', theme);
+
+    function updateThemeButton() {
+      themeToggle.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' mode');
+      themeToggle.innerHTML = theme === 'dark'
+        ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>'
+        : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
     }
 
-    function isTagAllowed(tag) {
-      if (!tag) return false;
-      const ranged = tag.startsWith('Ranged');
-      const weak = tag.startsWith('Weak');
-      const strong = tag.startsWith('Strong');
-      const mature = tag.startsWith('Mature');
-      if (ranged && !$('fRanged').checked) return false;
-      if (weak && !$('fWeak').checked) return false;
-      if (strong && !$('fStrong').checked) return false;
-      if (mature && !$('fMature').checked) return false;
-      return ranged || weak || strong || mature;
+    function renderQuote(index) {
+      const item = quotes[index];
+      quoteText.textContent = item.line;
+      quoteDesc.textContent = item.desc;
+      quoteIndex.textContent = String(index + 1).padStart(2, '0');
+      quoteTotal.textContent = String(quotes.length).padStart(2, '0');
     }
 
-    function stateText(v) {
-      if (v === 1) return '<span class="Bullish">Bullish</span>';
-      if (v === -1) return '<span class="Bearish">Bearish</span>';
-      return '<span class="muted">Neutral</span>';
-    }
+    function nextQuote(event) {
+      if (event && event.target && event.target.closest('[data-theme-toggle]')) return;
+      quoteCard.classList.remove('animate-in');
+      quoteCard.classList.add('animate-out');
 
-    function adxClass(label) {
-      if (!label) return '';
-      if (label.startsWith('Ranged')) return 'Ranged';
-      if (label.startsWith('Weak')) return 'Weak';
-      if (label.startsWith('Strong')) return 'Strong';
-      if (label.startsWith('Mature')) return 'Mature';
-      return '';
-    }
-
-    function tvInterval(tf) {
-      switch (tf) {
-        case 'Minute5': return '5';
-        case 'Minute15': return '15';
-        case 'Minute30': return '30';
-        case 'Hour': return '60';
-        case 'Hour4': return '240';
-        case 'Daily': return '1D';
-        case 'Weekly': return '1W';
-        default: return '60';
-      }
-    }
-
-    function renderResults() {
-      const maxResults = Number($('maxResults').value || 150);
-      const filtered = state.matchedSymbols.filter(m => isTagAllowed(m.HtfAdxLabel));
-      $('matchCount').textContent = String(state.matchedSymbols.length);
-      $('visibleCount').textContent = `Visible: ${filtered.length}`;
-      $('resultMeta').textContent = state.sortedByAdx ? 'Order: ADX Tag Sorted' : 'Order: Scan Order';
-      const tbody = $('resultsBody');
-      tbody.innerHTML = '';
-
-      filtered.slice(0, maxResults).forEach((item, idx) => {
-        const tr = document.createElement('tr');
-        const ticker = item.SymbolName.split('.')[0];
-        const ex1 = $('exchange1').value;
-        const ex2 = $('exchange2').value;
-        const intv = tvInterval($('tf2').value);
-        const l1 = ex1 ? `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(ex1 + ':' + ticker)}&interval=${encodeURIComponent(intv)}` : '';
-        const l2 = ex2 ? `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(ex2 + ':' + ticker)}&interval=${encodeURIComponent(intv)}` : '';
-        tr.innerHTML = `
-          <td>${idx + 1}</td>
-          <td><strong>${item.SymbolName}</strong></td>
-          <td><span class="tag ${adxClass(item.HtfAdxLabel)}">${item.HtfAdxLabel}</span></td>
-          <td>${stateText(item.Tf1State)}</td>
-          <td>${stateText(item.Tf2State)}</td>
-          <td>
-            ${l1 ? `<a href="${l1}" target="_blank" style="color:#8ec5ff">EX1</a>` : ''}
-            ${l2 ? ` | <a href="${l2}" target="_blank" style="color:#8ec5ff">EX2</a>` : ''}
-          </td>`;
-        tbody.appendChild(tr);
-      });
-
-      if (!filtered.length) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td colspan="6" class="muted">No matched symbols for the current tag filters.</td>';
-        tbody.appendChild(tr);
-      }
-    }
-
-    function setStatus(short, full) {
-      $('statusShort').textContent = short;
-      $('statusText').textContent = full;
-    }
-
-    function refreshActive() {
-      $('activeCount').textContent = String(state.activeJobs.length);
-      if (!state.activeJobs.length) {
-        $('activeJobsText').textContent = 'Active: -';
-        return;
-      }
-      $('activeJobsText').textContent = 'Active:\n' + state.activeJobs.map(j => `[${j.position}] ${j.symbol} | ${j.stage}`).join('\n');
-    }
-
-    function sortByAdx() {
-      if (!state.matchedSymbols.length) {
-        setStatus('No results', 'No results to sort.');
-        return;
-      }
-      state.matchedSymbols.sort((a, b) => {
-        const r = getAdxTagRank(a.HtfAdxLabel) - getAdxTagRank(b.HtfAdxLabel);
-        return r !== 0 ? r : a.SymbolName.localeCompare(b.SymbolName);
-      });
-      state.sortedByAdx = true;
-      setStatus('Sorted', 'Results sorted by ADX tag.');
-      renderResults();
-    }
-
-    function loadSampleData() {
-      state.matchedSymbols = [
-        { SymbolName: 'AAPL.US', HtfAdxLabel: 'Strong Bull', Tf1State: 1, Tf2State: -1 },
-        { SymbolName: 'MSFT.US', HtfAdxLabel: 'Weak Bull', Tf1State: 1, Tf2State: -1 },
-        { SymbolName: 'NVDA.US', HtfAdxLabel: 'Mature Bull', Tf1State: 1, Tf2State: -1 },
-        { SymbolName: 'TSLA.US', HtfAdxLabel: 'Ranged Bear', Tf1State: -1, Tf2State: -1 },
-        { SymbolName: 'AMZN.US', HtfAdxLabel: 'Strong Bear', Tf1State: -1, Tf2State: -1 },
-        { SymbolName: 'META.US', HtfAdxLabel: 'Weak Bear', Tf1State: -1, Tf2State: 1 },
-        { SymbolName: 'AMD.US', HtfAdxLabel: 'Ranged Bull', Tf1State: 1, Tf2State: 1 }
-      ];
-      state.sortedByAdx = false;
-      state.activeJobs = [];
-      state.total = state.matchedSymbols.length;
-      setStatus('Ready', 'Sample results loaded. This is a UI demo until you connect it to your cTrader WebView plugin.');
-      refreshActive();
-      renderResults();
-    }
-
-    function randomChoice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-    function runDemoScan() {
-      const market = $('market').value;
-      const symbols = sampleSymbolsByMarket[market] || sampleSymbolsByMarket.US;
-      const labels = ['Strong Bull','Weak Bull','Mature Bull','Ranged Bull','Strong Bear','Weak Bear','Mature Bear','Ranged Bear'];
-      state.matchedSymbols = [];
-      state.sortedByAdx = false;
-      state.total = symbols.length;
-      state.completed = 0;
-      state.scanning = true;
-      state.activeJobs = [];
-      setStatus('Scanning', `Started scan for ${symbols.length} symbols on ${market}.`);
-      refreshActive();
-      renderResults();
-
-      let i = 0;
-      const timer = setInterval(() => {
-        if (i >= symbols.length) {
-          clearInterval(timer);
-          state.scanning = false;
-          state.activeJobs = [];
-          refreshActive();
-          setStatus('Complete', `Scan complete. Matched: ${state.matchedSymbols.length}`);
-              return;
+      window.setTimeout(() => {
+        let next = Math.floor(Math.random() * quotes.length);
+        if (quotes.length > 1) {
+          while (next === currentIndex) next = Math.floor(Math.random() * quotes.length);
         }
+        currentIndex = next;
+        renderQuote(currentIndex);
+        label.textContent = 'Again. Keep your attention under command.';
+        quoteCard.classList.remove('animate-out');
+        quoteCard.classList.add('animate-in');
+      }, 120);
 
-        const symbol = symbols[i];
-        state.activeJobs = [{ position: i + 1, symbol, stage: 'Loading ST1' }];
-        refreshActive();
-
-        setTimeout(() => {
-          const item = {
-            SymbolName: symbol,
-            HtfAdxLabel: randomChoice(labels),
-            Tf1State: Math.random() > 0.5 ? 1 : -1,
-            Tf2State: Math.random() > 0.5 ? 1 : -1
-          };
-          const s1 = $('sentiment1').value;
-          const s2 = $('sentiment2').value;
-          const ok1 = s1 === 'Any' || (s1 === 'Bullish' && item.Tf1State === 1) || (s1 === 'Bearish' && item.Tf1State === -1);
-          const ok2 = s2 === 'Any' || (s2 === 'Bullish' && item.Tf2State === 1) || (s2 === 'Bearish' && item.Tf2State === -1);
-          if (ok1 && ok2) state.matchedSymbols.push(item);
-          state.completed++;
-          state.activeJobs = [{ position: i + 1, symbol, stage: 'Done' }];
-          refreshActive();
-          setStatus('Scanning', `Progress ${state.completed} / ${state.total} | Active: 1 | Matches: ${state.matchedSymbols.length}`);
-          renderResults();
-        }, 320);
-
-        i++;
-      }, 650);
+      if (event && typeof event.clientX === 'number') {
+        flash.style.left = event.clientX + 'px';
+        flash.style.top = event.clientY + 'px';
+        flash.style.animation = 'none';
+        void flash.offsetWidth;
+        flash.style.animation = 'pulseFlash 320ms ease-out forwards';
+      }
     }
 
-    init();
-
-    // cTrader WebView integration placeholder.
-    // Replace demo actions with calls to the cTrader WebView SDK/plugin bridge later.
-    window.screenerApp = {
-      setResults(results) {
-        state.matchedSymbols = Array.isArray(results) ? results : [];
-        state.sortedByAdx = false;
-        renderResults();
-        },
-      setStatus(message) {
-        setStatus('Update', message || '');
+    document.addEventListener('click', nextQuote);
+    document.addEventListener('keydown', (event) => {
+      if (event.code === 'Space' || event.code === 'Enter') {
+        event.preventDefault();
+        nextQuote();
       }
-    };
+    });
+
+    themeToggle.addEventListener('click', () => {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', theme);
+      updateThemeButton();
+    });
+
+    renderQuote(currentIndex);
+    updateThemeButton();
   </script>
 </body>
 </html>
